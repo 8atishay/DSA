@@ -526,14 +526,13 @@
 					}
 					return ans % MOD;
 				}
-
 			}
 			{
 				/*
 				Two teams?
 				https://www.interviewbit.com/problems/two-teams/
 
-				#Famous #Bipartate #2Color
+				#Famous #Bipartate #2Color #Good
 				*/
 				bool dfs(int ind, vector<bool> &color, bool col, vector<bool> &vis, vector<vector<int>> &adj) {
 					if (vis[ind]) return col == color[ind];
@@ -884,6 +883,7 @@
 				/*
 				Possibility of finishing all courses given pre-requisites
 				https://www.interviewbit.com/problems/possibility-of-finishing-all-courses-given-prerequisites/
+				https://leetcode.com/problems/course-schedule
 
 				#Famous
 				*/
@@ -912,45 +912,79 @@
 						}
 						return 1;
 					}
-
 				}
-				// White Grey Balck Algo : https://leetcode.com/problems/course-schedule/?envType=study-plan-v2&envId=top-interview-150
-				{
-					enum class State{white, grey, black};
+			}
+			// White Grey Balck Algo : https://leetcode.com/problems/course-schedule
+			// #AlgoExample
+			{
+				enum class State{white, grey, black};
 
-					class Solution {
-					public:
-						bool canFinish(int numCourses, vector<vector<int>>& prerequisites) {
-							vector<State> state(numCourses, State::white);
-							unordered_map<int, vector<int>> U;
+				class Solution {
+				public:
+					bool canFinish(int numCourses, vector<vector<int>>& prerequisites) {
+						vector<State> state(numCourses, State::white);
+						unordered_map<int, vector<int>> U;
 
-							for (auto x : prerequisites) {
-								U[x[0]].push_back(x[1]);
-							}
-							for (int i = 0; i < numCourses; i++) {
-								if (!dfs(i, U, state)) {
-									return false;
-								}
-							}
-							return true;
+						for (auto x : prerequisites) {
+							U[x[0]].push_back(x[1]);
 						}
-					private:
-						bool dfs(int i, unordered_map<int, vector<int>> &U, vector<State> &state) {
-							if (state[i] == State::grey) return false;
-							if (state[i] == State::black) return true;
-							if (U.find(i) == U.end()) return true;
-
-							state[i] = State::grey;
-							for (auto &x : U[i]) {
-								if (!dfs(x, U, state)) {
-									return false;
-								}
+						for (int i = 0; i < numCourses; i++) {
+							if (!dfs(i, U, state)) {
+								return false;
 							}
-							state[i] = State::black;
-							return true;
 						}
-					};
+						return true;
+					}
+				private:
+					bool dfs(int i, unordered_map<int, vector<int>> &U, vector<State> &state) {
+						if (state[i] == State::grey) return false;
+						if (state[i] == State::black) return true;
+						if (U.find(i) == U.end()) return true;
+
+						state[i] = State::grey;
+						for (auto &x : U[i]) {
+							if (!dfs(x, U, state)) {
+								return false;
+							}
+						}
+						state[i] = State::black;
+						return true;
+					}
+				};
+			}
+		}
+		{
+			/*
+			Course Schedule II
+			https://leetcode.com/problems/course-schedule-ii
+
+			#Kahn's Algo #AlgoExample #Good
+			*/
+			vector<int> findOrder(int numCourses, vector<vector<int>>& prerequisites) {
+				vector<vector<int>> V(numCourses);
+				vector<int> Edge(numCourses), ans;
+				for (auto &x : prerequisites) {
+					V[x[1]].push_back(x[0]);
+					Edge[x[0]]++;
 				}
+				queue<int> Q;
+				for (int i = 0; i < numCourses; i++) {
+					if (Edge[i] == 0) {
+						Q.push(i);
+					}
+				}
+				while (!Q.empty()) {
+					int top = Q.front();
+					Q.pop();
+					for (auto &x : V[top]) {
+						if (--Edge[x] == 0) {
+							Q.push(x);
+						}
+					}
+					ans.push_back(top);
+				}
+				if (ans.size() == numCourses) return ans;
+				return {};
 			}
 			{
 				/*
@@ -1088,7 +1122,7 @@
 				Useful Extra Edges
 				https://www.interviewbit.com/problems/useful-extra-edges/
 
-				#Good #VeryGood
+				#Good #VeryGood #Dijkstra #AlgoExample
 				*/
 				void dijikstra(vector<int> &d, vector<vector<pair<int, int>>>&adj, int start)
 				{
@@ -1268,10 +1302,1048 @@
 			}
 		}
 	}
+// DP
+	{
+		// 2D string DP
+		{
+			{
+				/*
+				Longest Common Subsequence
+				https://www.interviewbit.com/problems/longest-common-subsequence/
 
-}
+				#Famous #LongestCommonSunsequence #LCS #AlgoExample #BottomUp #Tabulation
+				*/
+				int Solution::solve(string A, string B) {
+					int n = A.length(), m = B.length();
+					vector<vector<int>> dp(n + 1, vector<int>(m + 1, 0));
+					for (int i = 1; i <= n; i++) {
+						for (int j = 1; j <= m; j++) {
+							if (A[i - 1] == B[j - 1]) {
+								dp[i][j] = 1 + dp[i - 1][j - 1];
+							} else {
+								dp[i][j] = max(dp[i - 1][j], dp[i][j - 1]);
+							}
+						}
+					}
+					return dp[n][m];
+				}
+			}
+			{
+				/*
+				Longest Palindromic Subsequence
+				https://interviewbit.com/problems/longest-palindromic-subsequence/
 
-{
-	/*
-	*/
-}
+				#Famous #TopDown #AlgoExample #Memoisation
+				*/
+				int pal(string & A, int s, int e, vector<vector<int>> &dp) {
+					if (dp[s][e] != -1)return dp[s][e];
+					int ans;
+					if (s + 1 == e) {
+						if (A[s] == A[e]) {
+							ans = 2;
+						} else {
+							ans = 1;
+						}
+					}
+					else if (A[s] == A[e]) {
+						ans = 2 + pal(A, s + 1, e - 1, dp);
+					}
+					else {
+						ans = max({pal(A, s + 1, e, dp), pal(A, s, e - 1, dp)});
+					}
+					dp[s][e] = ans;
+					return ans;
+				}
+				int Solution::solve(string A) {
+					int n = A.length();
+					vector<vector<int>> dp(n, vector<int> (n, -1));
+					for (int i = 0; i < n; i++)dp[i][i] = 1;
+					return pal(A, 0, n - 1, dp);
+				}
+			}
+			{
+				/*
+				Edit Distance
+				https://www.interviewbit.com/problems/edit-distance/
+
+				#Famous
+				*/
+				int Solution::minDistance(string A, string B) {
+					int n = A.length(), m = B.length();
+					vector<vector<int>> dp(n + 1, vector<int> (m + 1, 0));
+					for (int j = 0; j <= m; j++) {
+						dp[0][j] = j;
+					}
+					for (int i = 0; i <= n; i++) {
+						dp[i][0] = i;
+					}
+					for (int i = 1; i <= n; i++) {
+						for (int j = 1; j <= m; j++) {
+							if (A[i - 1] == B[j - 1]) {
+								dp[i][j] = dp[i - 1][j - 1];
+							} else {
+								dp[i][j] = min({dp[i][j - 1], //delete char from A
+								                dp[i - 1][j], //insert a char in A
+								                dp[i - 1][j - 1]
+								               }//replace last character in A
+								              ) + 1 ;
+							}
+						}
+					}
+					return dp[n][m];
+				}
+			}
+			{
+				/*
+					Repeating Sub-Sequence
+					https://www.interviewbit.com/problems/repeating-subsequence/
+				*/
+				int Solution::anytwo(string A) {
+					int n = A.length();
+					vector<vector<int>> M(n + 1, vector<int>(n + 1, 0));
+					for (int i = 1; i < n + 1; i++) {
+						for (int j = 1; j < n + 1; j++) {
+							if (A[i - 1] == A[j - 1] && i != j) {
+								M[i][j] = M[i - 1][j - 1] + 1;
+							} else {
+								M[i][j] = max(M[i - 1][j], M[i][j - 1]);
+							}
+						}
+					}
+					if (M[n][n] > 1)return 1;
+					return 0;
+				}
+			}
+			{
+				/*
+				Distinct Subsequences
+				https://www.interviewbit.com/problems/distinct-subsequences/
+				*/
+				int Solution::numDistinct(string A, string B) {
+					int n = A.length(), m = B.length();
+					vector<vector<int>> dp(n + 1, vector<int> (m + 1, 0));
+					for (int i = 0; i <= n; i++) {
+						dp[i][0] = 1;
+					}
+					for (int i = 1; i <= n; i++) {
+						for (int j = 1; j <= m; j++) {
+							if (A[i - 1] != B[j - 1]) {
+								dp[i][j] = dp[i - 1][j];
+							} else {
+								dp[i][j] = dp[i - 1][j] + dp[i - 1][j - 1];
+							}
+						}
+					}
+					return dp[n][m];
+				}
+			}
+			{
+				/*
+				Scramble String
+				https://www.interviewbit.com/problems/scramble-string/
+				*/
+				unordered_map<string, unordered_map<string, bool>> M;
+				bool helper(string A, string B) {
+					if (M.find(A) != M.end() && M[A].find(B) != M[A].end()) {
+						return M[A][B];
+					}
+					if (A == B) {
+						M[A][B] = 1;
+						return 1;
+					}
+					int n = A.length();
+					if (n == 1)return 0;
+
+					for (int i = 1; i < n; i++) {
+						if ((helper(A.substr(0, i), B.substr(n - i)) && helper(A.substr(i), B.substr(0, n - i)))
+						        || (helper(A.substr(0, i), B.substr(0, i)) && helper(A.substr(i), B.substr(i)))) {
+							M[A][B] = 1;
+							return 1;
+						}
+					}
+					M[A][B] = 0;
+					return 0;
+				}
+				int Solution::isScramble(const string A, const string B) {
+					if (A.length() != B.length())return 0;
+					if (A.length() == 0)return 1;
+					M.clear();
+					return helper(A, B);
+				}
+			}
+			{
+				/*
+				Regular Expression Match
+				https://www.interviewbit.com/problems/regular-expression-match/
+
+				#Good
+				*/
+				int Solution::isMatch(const string A, const string B) {
+					int n = A.length(), m = B.length();
+					vector<vector<bool>> M(n + 1, vector<bool> (m + 1, 0));
+					M[0][0] = true;
+					for (int i = 1; i <= m; i++) {
+						if (B[i - 1] == '*') M[0][i] = 1;
+						break;
+					}
+					for (int i = 1; i <= n; i++) {
+						for (int j = 1; j <= m; j++) {
+							if (A[i - 1] == B[j - 1] || B[j - 1] == '?') {
+								M[i][j] = M[i - 1][j - 1];
+							} else if (B[j - 1] == '*') {
+								M[i][j] = M[i - 1][j] || M[i][j - 1];
+							}
+						}
+					}
+					return M[n][m];
+				}
+			}
+			{
+				/*
+				Regular Expression II
+				https://www.interviewbit.com/problems/regular-expression-ii/
+
+				#Good
+				*/
+				bool comp(char a, char b) {
+					if (a == b) return 1;
+					else if (b == '.') return 1;
+					return 0;
+				}
+				int Solution::isMatch(const string A, const string B) {
+					int n = A.length(), m = B.length();
+					vector<vector<bool>> dp(n + 1, vector<bool>(m + 1, 0));
+					dp[0][0] = 1;
+					for (int i = 1; i <= n; i++) {
+						for (int j = 1; j <= m; j++) {
+							if (comp(A[i - 1], B[j - 1])) {
+								dp[i][j] = dp[i - 1][j - 1];
+							} else if (B[j - 1] == '*') {
+								dp[i][j] = dp[i][j - 2] // 0 repeat
+								           || dp[i][j - 1]; // 1 repeat
+								if (comp(A[i - 1], B[j - 2])) {
+									dp[i][j] = dp[i][j] || dp[i - 1][j]; // more repeat
+								}
+							}
+						}
+					}
+					return dp[n][m];
+				}
+
+			}
+			{
+				/*
+				Interleaving Strings
+				https://www.interviewbit.com/problems/interleaving-strings/
+				*/
+				int Solution::isInterleave(string A, string B, string C) {
+					int a = A.length(), b = B.length(), c = C.length();
+					vector<vector<int>> dp(a + 1, vector<int> (b + 1, 0));
+					dp[0][0] = 1;
+					for (int i = 1; i <= a && A[i - 1] == C[i - 1]; i++) dp[i][0] = 1;
+					for (int j = 1; j <= b && B[j - 1] == C[j - 1]; j++) dp[0][j] = 1;
+
+					for (int i = 1; i <= a; i++) {
+						for (int j = 1; j <= b; j++) {
+							if ((dp[i - 1][j] && A[i - 1] == C[i + j - 1]) || (dp[i][j - 1] && B[j - 1] == C[i + j - 1])) {
+								dp[i][j] = 1;
+							}
+						}
+					}
+					return dp[a][b];
+				}
+			}
+		}
+		// Simple array DP
+		{
+			{
+				/*
+				Length of Longest Subsequence
+				https://www.interviewbit.com/problems/length-of-longest-subsequence/
+
+				#Famous
+				*/
+				int Solution::longestSubsequenceLength(const vector<int> &A) {
+					vector<int> G(A.size(), 1), S = G;
+					for (int i = 0; i < A.size(); i++) {
+						for (int j = 0; j < i; j++) {
+							if (A[i] > A[j] && G[i] < G[j] + 1) {
+								G[i] = G[j] + 1;
+							}
+						}
+					}
+					for (int i = A.size() - 1; i >= 0; i--) {
+						for (int j = A.size() - 1; j > i; j--) {
+							if (A[i] > A[j] && S[i] < S[j] + 1) {
+								S[i] = S[j] + 1;
+							}
+						}
+					}
+					int ans = 0;
+					for (int i = 0; i < A.size(); i++) {
+						ans = max(ans, G[i] + S[i] - 1);
+					}
+					return ans;
+				}
+			}
+			{
+				/*
+				Smallest sequence with given Primes
+				https://www.interviewbit.com/problems/smallest-sequence-with-given-primes/
+				*/
+				vector<int> Solution::solve(int A, int B, int C, int D) {
+					set<int> s;
+					s.insert(A);
+					s.insert(B);
+					s.insert(C);
+					vector<int> arr;
+					if (D == 0)
+						return arr;
+					while (!s.empty())
+					{
+						int a = *(s.begin());
+						s.erase(s.begin());
+						arr.push_back(a);
+						if (arr.size() == D)
+							break;
+						s.insert(a * A);
+						s.insert(a * B);
+						s.insert(a * C);
+					}
+					return arr;
+				}
+			}
+			{
+				/*
+				Largest area of rectangle with permutations
+				https://www.interviewbit.com/problems/largest-area-of-rectangle-with-permutations/
+
+				#Good #VeryGood #Tricky
+				*/
+				int area(vector<int> M) {
+					sort(M.begin(), M.end());
+					int ans = 0;
+					for (int i = 0; i < M.size(); i++) {
+						ans = max(ans, M[i] * (M.size() - i));
+					}
+					return ans;
+				}
+				int Solution::solve(vector<vector<int>> &A) {
+					int n = A.size(), m = A[0].size();
+					vector<vector<int>> M(n, vector<int> (m, 0));
+					for (int i = n - 1, i >= 0; i--) {
+						for (int j = 0; j < m; j++) {
+							if (A[i][j] == 1) {
+								if (i == n - 1) {
+									M[i][j] = 1;
+								} else {
+									M[i][j] = M[i + 1][j] + 1;
+								}
+							}
+						}
+					}
+					int ans = 0;
+					for (int i = 0; i < n; i++) {
+						ans = max(ans, area(M[i]));
+					}
+					return ans;
+				}
+			}
+			{
+				/*
+				Tiling With Dominoes
+				https://www.interviewbit.com/problems/tiling-with-dominoes/
+
+				#Good
+				*/
+				long long M 1000000007
+				int Solution::solve(int n) {
+					if (n % 2 != 0)return 0;
+					vector<long long> A(n + 1, 0), B(n + 1, 0);
+					A[0] = 1;
+					B[1] = 1;
+					for (int i = 2; i <= n; i += 2) {
+						A[i] = (A[i - 2] + 2 * B[i - 1]) % M;
+						B[i + 1] = (A[i] + B[i - 1]) % M;
+					}
+					return A[n];
+				}
+
+			}
+			{
+				/*
+				Paint House!
+				https://www.interviewbit.com/problems/paint-house/
+				*/
+				int Solution::solve(vector<vector<int> > &A) {
+					vector<vector<int>> C(A.size(), vector<int>(3, -1));
+					int n = A.size();
+					C[0] = A[0];
+					for (int i = 1; i < n; i++) {
+						for (int j = 0; j < 3; j++) {
+							C[i][j] = min(C[i - 1][(j + 1) % 3], C[i - 1][(j + 2) % 3]) + A[i][j];
+						}
+					}
+					return min({C[n - 1][0], C[n - 1][1], C[n - 1][2]});
+				}
+			}
+			{
+				/*
+				Ways to Decode
+				https://www.interviewbit.com/problems/ways-to-decode/
+				*/
+				int Solution::numDecodings(string A) {
+					int N = A.length();
+					int dp[N + 1] = {};
+					dp[0] = 1;
+					dp[1] = A[0] == '0' ? 0 : 1;
+					for (int i = 2; i <= N; i++) {
+						int oneDigit = stoi(A.substr(i - 1, 1));
+						int twoDigit = stoi(A.substr(i - 2, 2));
+						if (oneDigit >= 1) {
+							dp[i] += dp[i - 1];
+						}
+						if (twoDigit <= 26) {
+							dp[i] += dp[i - 2];
+						}
+						dp[i] %= 1000000007;
+					}
+					return dp[N];
+				}
+			}
+			{
+				/*
+				Stairs
+				https://www.interviewbit.com/problems/stairs/
+
+				#Famous
+				*/
+				int Solution::climbStairs(int A) {
+					vector<int> dp(A + 1, 0);
+					dp[0] = 1;
+					dp[1] = 1;
+					for (int i = 2; i <= A; i++) {
+						dp[i] = dp[i - 1] + dp[i - 2];
+					}
+					return dp[A];
+				}
+			}
+			{
+				/*
+				Longest Increasing Subsequence
+				https://www.interviewbit.com/problems/longest-increasing-subsequence/
+
+				#Famous
+				*/
+				int Solution::lis(const vector<int> &A) {
+					int n = A.size();
+					if (n == 0)return 0;
+					vector<int> lcs(n, 1);
+					for (int i = 0; i < n; i++) {
+						for (int j = 0; j < i; j++) {
+							if (A[i] > A[j] && lcs[i] < 1 + lcs[j]) {
+								lcs[i] = 1 + lcs[j];
+							}
+						}
+					}
+					return *max_element(lcs.begin(), lcs.end());
+				}
+			}
+			{
+				/*
+				Intersecting Chords in a Circle
+				https://www.interviewbit.com/problems/intersecting-chords-in-a-circle/
+				*/
+				long long M 1000000007;
+				int helper(int A, vector<long long int> &dp) {
+					if (dp[A] != -1) return dp[A];
+					long long int x = 0;
+					for (int i = 0; i < A; i++) {
+						x += helper(i, dp) * helper(A - i - 1, dp);
+						x %= M;
+					}
+					dp[A] = x;
+					return x;
+				}
+				int Solution::chordCnt(int A) {
+					vector<long long int> dp(A + 1, -1);
+					if (A == 0)return 0;
+					if (A == 1)return 1;
+					dp[0] = 1;
+					dp[1] = 1;
+					dp[2] = 2;
+					return helper(A, dp);
+				}
+
+			}
+		}
+		// Greedy OR DP
+		{
+			{
+				/*
+				Tushar's Birthday Bombs
+				https://www.interviewbit.com/problems/tushars-birthday-bombs/
+
+				#Good
+				*/
+				vector<int> Solution::solve(int A, vector<int> &B) {
+					int n = A, m = B.size();
+					vector<int> dp(A + 1, -1), back(A + 1, 0), ans;
+					for (int i = 1; i <= A; i++) {
+						for (int j = 0; j < m; j++) {
+							if (i >= B[j] && dp[i] < 1 + dp[i - B[j]]) {
+								dp[i] = 1 + dp[i - B[j]];
+								back[i] = j;
+							}
+						}
+					}
+					while (A > 0 && A - B[back[A]] >= 0) {
+						ans.push_back(back[A]);
+						A -= B[back[A]];
+					}
+					return ans;
+				}
+			}
+			{
+				/*
+				Jump Game Array
+				https://www.interviewbit.com/problems/jump-game-array/
+				*/
+				int Solution::canJump(vector<int> &A) {
+					int n = A.size(), maxi = 0;
+					for (int i = 0; i < n; i++) {
+						if (maxi < i)return 0;
+						maxi = max(maxi, i + A[i]);
+					}
+					return 1;
+				}
+			}
+			{
+				/*
+				Min Jumps Array
+				https://www.interviewbit.com/problems/min-jumps-array/
+
+				#Famous
+				*/
+				int Solution::jump(vector<int> &A) {
+					if (A.size() <= 1) return 0;
+					int maxi = A[0], ans = 1;
+					for (int i = 1; i < A.size(); i++) {
+						if (maxi >= A.size() - 1) return ans;
+						if (maxi < i) return -1;
+
+						int cm = maxi;
+						for (int j = i; j <= cm; j++) {
+							maxi = max(maxi, j + A[j]);
+						}
+						i = cm;
+						ans++;
+					}
+					return ans;
+				}
+			}
+
+		}
+		// DP tricky
+		{
+			{
+				/*
+				N digit numbers with digit sum S
+				https://www.interviewbit.com/problems/n-digit-numbers-with-digit-sum-s-/
+				*/
+				long long M 1000000007;
+				int Solution::solve(int A, int B) {
+					if (B == 0 || A == 0)return 0;
+
+					vector<vector<int>> dp(A + 1, vector<int> (B + 1, 0));
+					for (int j = 1; j <= min(9, B); j++) {
+						dp[1][j] = 1;
+					}
+
+					for (int i = 2; i <= A; i++) {
+						for (int j = 1; j <= B; j++) {
+							for (int k = 0; k <= 9 && j - k >= 0; k++) {
+								dp[i][j] += dp[i - 1][j - k];
+								dp[i][j] %= M;
+							}
+						}
+					}
+					return dp[A][B];
+				}
+			}
+			{
+				/*
+				Ways to color a 3xN Board
+				https://www.interviewbit.com/problems/ways-to-color-a-3xn-board/
+				*/
+				int Solution::solve(int A) {
+					int dp[4][4][4][A + 1];
+					vector<vector<int>> valid;
+					for (int i = 0; i < 4; i++) {
+						for (int j = 0; j < 4; j++) {
+							if (j == i)continue;
+							for (int k = 0; k < 4; k++) {
+								if (j == k)continue;
+								dp[i][j][k][1] = 1;
+								valid.push_back({i, j, k});
+							}
+						}
+					}
+					for (int i = 2; i <= A; i++) {
+						for (auto &x : valid) {
+							dp[x[0]][x[1]][x[2]][i] = 0;
+							for (auto &y : valid) {
+								if (x[0] == y[0] || x[1] == y[1] || x[2] == y[2])continue;
+								dp[x[0]][x[1]][x[2]][i] += dp[y[0]][y[1]][y[2]][i - 1];
+								dp[x[0]][x[1]][x[2]][i] %= 1000000007;
+							}
+						}
+					}
+					int ans = 0;
+					for (auto &x : valid) {
+						ans += dp[x[0]][x[1]][x[2]][A];
+						ans %= 1000000007;
+					}
+					return ans;
+				}
+			}
+			{
+				/*
+				Kth Manhattan Distance Neighbourhood
+				https://www.interviewbit.com/problems/kth-manhattan-distance-neighbourhood/
+				*/
+				vector<vector<int> > Solution::solve(int A, vector<vector<int> > &B) {
+					int n = B.size(), m = B[0].size();
+					vector<vector<int>> S(n, vector<int>(m, 0));
+					int M[n][m][A + 1];
+					for (int i = 0; i < n; i++) {
+						for (int j = 0; j < m; j++) {
+							for (int k = 0; k <= A; k++) {
+								M[i][j][k] = max({
+									(j - k >= 0) ? B[i][j - k] : INT_MIN,
+									(j + k < m) ? B[i][j + k] : INT_MIN,
+									(k != 0) ? M[i][j][k - 1] : INT_MIN
+								});
+							}
+						}
+					}
+					for (int i = 0; i < n; i++) {
+						for (int j = 0; j < m; j++) {
+							for (int k = 0; k <= A; k++) {
+								S[i][j] = max({ S[i][j],
+								                (i - k >= 0) ? M[i - k][j][A - k] : INT_MIN,
+								                (i + k < n) ? M[i + k][j][A - k] : INT_MIN
+								              });
+							}
+						}
+					}
+					return S;
+				}
+			}
+			{
+				/*
+				Best Time to Buy and Sell Stock atmost B times
+				https://www.interviewbit.com/problems/best-time-to-buy-and-sell-stock-atmost-b-times/
+
+				#Famous #Revise #GoodSolution
+				*/
+				int Solution::solve(vector<int> &A, int B) {
+					int n = A.size();
+					B = min(B, n / 2);
+					vector<vector<int>> M(B + 1, vector<int> (n + 1));
+					for (int i = 1; i <= B; i++) {
+						int diff = INT_MIN;
+						for (int j = 1; j <= A.size(); j++) {
+							diff = max(diff, M[i - 1][j] - A[j - 1]);
+							M[i][j] = max(M[i][j - 1], A[j - 1] + diff);
+						}
+					}
+					return M[B][A.size()];
+				}
+			}
+			{
+				/*
+				Coins in a Line
+				https://www.interviewbit.com/problems/coins-in-a-line/
+
+				#Good
+				*/
+				vector<int> sum;
+				vector<vector<int>> dp;
+				int pick(vector<int> &A, int s, int e) {
+					if (dp[s][e] != -1)return dp[s][e];
+					if (e - s <= 1) {
+						dp[s][e] = max(A[s], A[e]);
+						return dp[s][e];
+					}
+					dp[s][e] = sum[e + 1] - sum[s] - min(pick(A, s + 1, e), pick(A, s, e - 1));
+					return dp[s][e];
+				}
+				int Solution::maxcoin(vector<int> &A) {
+					int n = A.size();
+					dp = vector<vector<int>> (n, vector<int>(n, -1));
+					sum = vector<int>(n + 1);
+					for (int i = 1; i <= n; i++) {
+						sum[i] = sum[i - 1] + A[i - 1];
+					}
+					return pick(A, 0, n - 1);
+				}
+
+			}
+			{
+				/*
+				Evaluate Expression To True
+				https://www.interviewbit.com/problems/evaluate-expression-to-true/
+				*/
+				vector<vector<vector<int>>> M;
+				int count(string & A, int s, int e, int state) {
+					if (M[s][e][state] != -1) {
+						return M[s][e][state];
+					}
+					int ansT = 0, ansF = 0;
+					for (int i = s; i < e; i++) {
+						char opr = A[2 * i + 1];
+						if (opr == '|') {
+							ansT += count(A, s, i, 1) * count(A, i + 1, e, 1);
+							ansT += count(A, s, i, 0) * count(A, i + 1, e, 1);
+							ansT += count(A, s, i, 1) * count(A, i + 1, e, 0);
+							ansF += count(A, s, i, 0) * count(A, i + 1, e, 0);
+						} else if (opr == '&') {
+							ansT += count(A, s, i, 1) * count(A, i + 1, e, 1);
+							ansF += count(A, s, i, 0) * count(A, i + 1, e, 1);
+							ansF += count(A, s, i, 1) * count(A, i + 1, e, 0);
+							ansF += count(A, s, i, 0) * count(A, i + 1, e, 0);
+						} else if (opr == '^') {
+							ansF += count(A, s, i, 1) * count(A, i + 1, e, 1);
+							ansT += count(A, s, i, 0) * count(A, i + 1, e, 1);
+							ansT += count(A, s, i, 1) * count(A, i + 1, e, 0);
+							ansF += count(A, s, i, 0) * count(A, i + 1, e, 0);
+						}
+						ansT %= 1003, ansF %= 1003;
+					}
+					M[s][e][0] = ansF;
+					M[s][e][1] = ansT;
+					return M[s][e][state];
+				}
+				int Solution::cnttrue(string A) {
+					int n = (A.length() + 1) / 2;
+					M = vector<vector<vector<int>>> (n, vector<vector<int>> (n, vector<int>(2, -1)));
+
+					for (int i = 0; i < n; i++) {
+						bool state = A[2 * i] == 'T';
+						M[i][i][state] = 1;
+						M[i][i][!state] = 0;
+					}
+					return count(A, 0, n - 1, 1);
+				}
+			}
+			{
+				/*
+				Egg Drop Problem!
+				https://www.interviewbit.com/problems/egg-drop-problem/
+
+				#Famous
+				*/
+				int Solution::solve(int eggs, int floors)
+				{
+					vector<vector<int>> dp(floors + 1, vector<int> (eggs + 1, 0));
+					int moves = 0;
+					while (dp[moves][eggs] < floors) {
+						moves++;
+						for (int egg = 1; egg <= eggs; egg++) {
+							dp[moves][egg] = dp[moves - 1][egg] + 1 + dp[moves - 1][egg - 1];
+							// not breaking + 1 + breakage
+						}
+					}
+					return moves;
+				}
+			}
+			{
+				/*
+				Longest valid Parentheses
+				https://www.interviewbit.com/problems/longest-valid-parentheses/
+
+				#Good
+				*/
+				int Solution::longestValidParentheses(string A) {
+					int n = A.length();
+					vector<int> S = { -1};
+					for (int i = 0; i < n; i++) {
+						if (S.back() != -1 && A[S.back()] == '(' && A[i] == ')') {
+							S.pop_back();
+						} else {
+							S.push_back(i);
+						}
+					}
+					S.push_back(n);
+					int ans = 0;
+					int n2 = S.size();
+					for (int i = 1; i < n2; i++) {
+						ans = max(ans, S[i] - S[i - 1] - 1);
+					}
+					return ans;
+				}
+			}
+
+		}
+		// tree DP
+		{
+			{
+				/*
+				Max edge queries!
+				https://www.interviewbit.com/problems/max-edge-queries/
+				*/
+				{
+					vector<int> level, parent;
+					unordered_map<int, unordered_map<int, int>> dp, &L = dp;
+					int findlevel(int i) {
+						if (level[i] != -1)return level[i];
+						return level[i] = 1 + findlevel(parent[i]);
+					}
+					int lca(int a, int b) {
+						if (a < b)swap(a, b);
+						if (a == b) {
+							return a;
+						}
+						if (L.find(a) != L.end() && L[a].find(b) != L[a].end())return L[a][b];
+						else if (findlevel(a) == findlevel(b)) {
+							L[a][b] = lca(parent[a], parent[b]);
+						}
+						else if (findlevel(a) < findlevel(b)) {
+							L[a][b] = lca(a, parent[b]);
+						}
+						else if (findlevel(a) > findlevel(b)) {
+							L[a][b] = lca(parent[a], b);
+						}
+						return L[a][b];
+					}
+
+					int helper(int s, int e);
+					int helper2(int a, int c) {
+						int s = min(a, c), e = max(a, c);
+						if (dp.find(s) != dp.end() && dp[s].find(e) != dp[s].end())return dp[s][e];
+						return dp[s][e] = max(helper2(a, parent[c]), helper(c, parent[c]));
+					}
+					int helper(int s, int e) {
+						if (s > e)swap(s, e);
+						if (dp.find(s) != dp.end() && dp[s].find(e) != dp[s].end())return dp[s][e];
+						int b = lca(s, e);
+						if (b == s) {
+							return dp[s][e] = helper2(s, e);
+						}
+						if (b == e) {
+							return dp[s][e] = helper2(e, s);
+						}
+						return dp[s][e] = max(helper(s, b), helper(b, e));
+					}
+
+					void gclear(int N) {
+						dp.clear();
+						parent = vector<int> (N, -1);
+						level = parent;
+
+						parent[0] = 0;
+						level[0] = 0;
+					}
+
+					vector<int> Solution::solve(vector<vector<int> > &A, vector<vector<int> > &B) {
+						int N = A.size() + 1, Q = B.size();
+						gclear(N);
+
+						for (int i = 0; i < N - 1; i++) {
+							if (A[i][0] > A[i][1]) swap(A[i][0], A[i][1]);
+							dp[A[i][0] - 1][A[i][1] - 1] = A[i][2];
+							dp[i][i] = 0;
+						}
+						sort(A.begin(), A.end());
+						for (int i = 0; i < N - 1; i++) {
+							if (parent[A[i][0] - 1] == -1) {
+								parent[A[i][0] - 1] = A[i][1] - 1;
+							}
+							else if (parent[A[i][1] - 1] == -1) {
+								parent[A[i][1] - 1] = A[i][0] - 1;
+							}
+						}
+						vector<int> S;
+						for (int i = 0; i < Q; i++) {
+							if (B[i][0] > B[i][1]) swap(B[i][0], B[i][1]);
+							S.push_back(helper(B[i][0] - 1, B[i][1] - 1));
+						}
+						return S;
+					}
+				}
+			}
+			{
+				/*
+				Max Sum Path in Binary Tree
+				https://www.interviewbit.com/problems/max-sum-path-in-binary-tree/
+				*/
+				int mx;
+				int onepath(TreeNode * A) {
+					if (!A)return 0;
+					int left = max(0, onepath(A->left));
+					int right = max(0, onepath(A->right));
+					mx = max(mx, left + right + A->val);
+					return A->val + max(left, right);
+				}
+				int Solution::maxPathSum(TreeNode * A) {
+					mx = INT_MIN;
+					onepath(A);
+					return mx;
+				}
+			}
+		}
+		// Matrix DP
+		{
+			{
+				/*
+				Kingdom War
+				https://www.interviewbit.com/problems/kingdom-war/
+				*/
+				int Solution::solve(vector<vector<int> > &A) {
+					int n = A.size(), m = A[0].size(), ans = INT_MIN;
+					A.push_back(vector<int>(m + 1));
+					for (int i = n - 1; i >= 0; i--) {
+						A[i].push_back(0);
+						for (int j = m - 1; j >= 0; j--) {
+							A[i][j] += A[i + 1][j] + A[i][j + 1] - A[i + 1][j + 1];
+							ans = max(ans, A[i][j]);
+						}
+					}
+					return ans;
+				}
+			}
+			{
+				/*
+				Maximum Path in Triangle
+				https://www.interviewbit.com/problems/maximum-path-in-triangle/
+				*/
+				int Solution::solve(vector<vector<int> > &A) {
+					int n = A.size();
+					vector<vector<int>> dp(n, vector<int> (n, 0));
+					dp[0][0] = A[0][0];
+					for (int i = 1; i < n; i++) {
+						dp[i][0] = dp[i - 1][0] + A[i][0];
+						for (int j = 1; j <= i; j++) {
+							dp[i][j] = A[i][j] + max(dp[i - 1][j], dp[i - 1][j - 1]);
+						}
+					}
+					return *max_element(dp[n - 1].begin(), dp[n - 1].end());
+				}
+			}
+			{
+				/*
+				Maximum Size Square Sub-matrix
+				https://www.interviewbit.com/problems/maximum-size-square-sub-matrix/
+
+				#Famous
+				*/
+				int Solution::solve(vector<vector<int> > &A) {
+					int n = A.size(), m = A[0].size(), S = 0;
+					vector<vector<int>> dp(n + 1, vector<int>(m + 1, 0));
+					for (int i = 1; i <= n; i++) {
+						for (int j = 1; j <= m; j++) {
+							if (A[i - 1][j - 1] == 1) {
+								dp[i][j] = 1 + min({dp[i][j - 1], dp[i - 1][j], dp[i - 1][j - 1]});
+								S = max(dp[i][j], S);
+							}
+						}
+					}
+					return S * S;
+				}
+			}
+			{
+				/*
+				*/
+			}
+			{
+				/*
+				*/
+			}
+			{
+				/*
+				*/
+			}
+			{
+				/*
+				*/
+			}
+			{
+				/*
+				*/
+			}
+			{
+				/*
+				*/
+			}
+			{
+				/*
+				*/
+			}
+			{
+				/*
+				*/
+			}
+		}
+		// Suffix / prefix DP
+		{
+			{
+				/*
+				*/
+			}
+		}
+		// Derived DP
+		{
+			{
+				/*
+				*/
+			}
+
+		}
+		// Knapsack
+		{
+			{
+				/*
+				*/
+			}
+
+		}
+		// Adhoc
+		{
+			{
+				/*
+				*/
+			}
+
+		}
+		// DP optimized backtrack
+		{
+			{
+				/*
+				*/
+			}
+
+		}
+		// Multiply DP
+		{
+			{
+				/*
+				*/
+			}
+
+		}
+		// Breaking words
+		{
+			{
+				/*
+				*/
+
+
+			}
+		}
+	}
+
+	{
+		/*
+		*/
+	}
