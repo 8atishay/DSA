@@ -478,7 +478,7 @@
 					for (int &x : adj[ind]) {
 						if (cycle(adj, vis, A, x)) return 1;
 					}
-					vis[ind] = 0;
+					vis[ind] = 0; // Resetting to 0
 					return 0;
 				}
 				int Solution::solve(int A, vector<vector<int> > &B) {
@@ -8200,7 +8200,7 @@
 
 				#Tricky #Revise
 				*/
-				//#define ll long long 
+				//#define ll long long
 				vector<int> Solution::repeatedNumber(const vector<int> &A) {
 					ll n = A.size();
 
@@ -8270,8 +8270,532 @@
 		// String Simulation
 		{
 			{
-				/**/
-				
+				/*
+				Palindrome String
+				https://www.interviewbit.com/problems/palindrome-string/
+
+				#Famous
+				*/
+				int Solution::isPalindrome(string s) {
+					int i = 0, j = (int)s.size() - 1;
+					while (i < j) {
+						while (i < j && !isalnum(s[i])) i++;
+						while (i < j && !isalnum(s[j])) j--;
+						if (toupper(s[i]) != toupper(s[j])) return false;
+						i++;
+						j--;
+					}
+					return true;
+				}
+			}
+			{
+				/*
+				Vowel and Consonant Substrings!
+				https://www.interviewbit.com/problems/vowel-and-consonant-substrings/
+				*/
+				bool vowel(char c) {
+					if (c == 'a' || c == 'e' || c == 'i' || c == 'o' || c == 'u')return 1;
+					return 0;
+				}
+				int Solution::solve(string A) {
+					int n = A.length(), vcount = 0, ccount = 0, ans = 0;
+					for (int i = 0; i < n; i++) {
+						if (vowel(A[i])) {
+							vcount++;
+							ans += ccount;
+						} else {
+							ccount++;
+							ans += vcount;
+						}
+						ans %= 1000000007;
+					}
+					return ans;
+				}
+			}
+			{
+				/*
+				Remove Consecutive Characters
+				https://www.interviewbit.com/problems/remove-consecutive-characters/
+				*/
+				string Solution::solve(string A, int B) {
+					char temp = A[0];
+					int count = 0;
+					string ans = "";
+					for (int i = 0; i < A.length(); i++) {
+						if (temp != A[i]) {
+							if (count != B) ans += string(count, temp);
+							count = 1;
+							temp = A[i];
+						} else {
+							count++;
+						}
+					}
+					if (count != B) ans += string(count, temp);
+					return ans;
+				}
+			}
+			{
+				/*
+				Longest Common Prefix
+				https://www.interviewbit.com/problems/longest-common-prefix/
+
+				#Good
+				*/
+				// Best
+				{
+					Can use Binary search on minimum size string
+				}
+				// Good
+				{
+					string Solution::longestCommonPrefix(vector<string> &A) {
+						string ans = "";
+						int n = A.size(), m = INT_MAX;
+						for (string s : A) m = min(m, (int) s.size());
+						for (int j = 0; j < m; j++) {
+							for (int i = 1; i < n; i++) {
+								if (A[i][j] != A[0][j]) return ans;
+							}
+							ans += A[0][j];
+						}
+						return ans;
+					}
+				}
+			}
+			{
+				/*
+				Count And Say
+				https://www.interviewbit.com/problems/count-and-say/
+				*/
+				string Solution::countAndSay(int A) {
+					string ans = "1";
+					while (A-- > 1) {
+						int n = ans.size(), count = 1;
+						string temp = "";
+						for (int i = 1; i < n; i++) {
+							if (ans[i] != ans[i - 1]) {
+								temp += to_string(count) + ans[i - 1];
+								count = 1;
+							} else {
+								count++;
+							}
+						}
+						temp += to_string(count) + ans.back();
+						ans = temp;
+					}
+					return ans;
+				}
+			}
+		}
+		// String Search
+		{
+			{
+				/*
+				Amazing Subarrays
+				https://www.interviewbit.com/problems/amazing-subarrays/
+				*/
+				bool check(char c) {
+					c = toupper(c);
+					if (c == 'A' || c == 'E' || c == 'I' || c == 'O' || c == 'U')return 1;
+					return 0;
+				}
+				int Solution::solve(string A) {
+					int n = A.length(), count = 0;
+					for (int i = 0; i < n; i++) {
+						if (check(A[i])) {
+							count += (n - i) % 10003;
+						}
+					}
+					return count % 10003;
+				}
+			}
+			{
+				/*
+				Implement StrStr
+				https://www.interviewbit.com/problems/implement-strstr/
+
+				#KMP
+				*/
+			}
+			{
+				/*
+				Stringoholics
+				https://www.interviewbit.com/problems/stringoholics/
+
+				#GCD*/
+			}
+		}
+		// String Tricks
+		{
+			{
+				/*
+				Minimum Characters required to make a String Palindromic
+				https://www.interviewbit.com/problems/minimum-characters-required-to-make-a-string-palindromic/
+				*/
+				int Solution::solve(string A) {
+					int n = A.length();
+					int l = 0, r = n - 1;
+					while (l < r) {
+						if (A[l] != A[r]) {
+							if (l == 0) {
+								r--;
+							} else {
+								l = 0;
+							}
+						} else {
+							l++;
+							r--;
+						}
+					}
+					if (l == r) {
+						return n - 2 * l - 1;
+					} else {
+						return n - 2 * l;
+					}
+				}
+			}
+			{
+				/*
+				Longest Palindromic Substring
+				https://www.interviewbit.com/problems/longest-palindromic-substring/
+
+				#Famous #Revise
+				*/
+				string expandAroundCenter(string s, int c1, int c2) {
+					int l = c1, r = c2;
+					int n = s.length();
+					while (l >= 0 && r <= n - 1 && s[l] == s[r]) {
+						l--;
+						r++;
+					}
+					return s.substr(l + 1, r - l - 1);
+				}
+				string Solution::longestPalindrome(string s) {
+					int n = s.length();
+					if (n == 0) return "";
+					string longest = s.substr(0, 1);  // a single char itself is a palindrome
+					for (int i = 0; i < n - 1; i++) {
+						string p1 = expandAroundCenter(s, i, i);
+						if (p1.length() > longest.length())
+							longest = p1;
+
+						string p2 = expandAroundCenter(s, i, i + 1);
+						if (p2.length() > longest.length())
+							longest = p2;
+					}
+					return longest;
+				}
+			}
+			{
+				/*
+				Minimum Parantheses!
+				https://www.interviewbit.com/problems/minimum-parantheses/
+				*/
+				int Solution::solve(string A) {
+					int start = 0, i = 0, count = 0;
+					while (A[i] != '\0') {
+						if (A[i] == '(') {
+							start++;
+						} else if (A[i] == ')') {
+							if (start > 0) {
+								start--;
+							} else {
+								count++;
+							}
+						}
+						i++;
+					}
+					return start + count;
+				}
+			}
+			{
+				/*
+				Minimum Appends for Palindrome!
+				https://www.interviewbit.com/problems/minimum-appends-for-palindrome/
+
+				#Good
+				*/
+				int Solution::solve(string A) {
+					string B = A;
+					reverse(B.begin(), B.end());
+					B = B + '#' + A;
+					int n = B.length(), i = 1, len = 0;
+					vector<int> LPS(n, 0);
+					while (i < n) {
+						if (B[len] == B[i]) {
+							len++;
+							LPS[i] = len > (i + 1) / 2 ? (i + 1) / 2 : len;
+						} else {
+							if (len == 0) {
+								LPS[i] = 0;
+							} else {
+								len = LPS[len - 1];
+								i--;
+							}
+						}
+						i++;
+					}
+					return A.length() - LPS.back();
+				}
+			}
+			{
+				/*
+				Convert to Palindrome
+				https://www.interviewbit.com/problems/convert-to-palindrome/
+				*/
+				int Solution::solve(string A) {
+					int left = 0;
+					int right = A.size() - 1;
+					int count = 0;
+					while (left < right)
+					{
+						if (A[left] == A[right]) {left++; right--;}
+						else if (A[left + 1] == A[right]) {count++; left++;}
+						else if (A[left] == A[right - 1]) {count++; right--;}
+						else return 0;
+					}
+					if (count == 0 and left == right) return 1;
+					if (count == 1) return 1;
+					return 0;
+				}
+			}
+		}
+		// String Math
+		{
+			{
+				/*
+				Integer To Roman
+				https://www.interviewbit.com/problems/integer-to-roman/
+
+				#Famous
+				*/
+				vector<char> R = {'I', 'V', 'X', 'L', 'C', 'D', 'M'};
+				string roman(int x, int p) {
+					if (x == 0)return "";
+					if (x <= 3)return string(x, R[2 * p]);
+					else if (x <= 5)return string(5 - x, R[2 * p]) + R[2 * p + 1];
+					else if (x <= 8)return R[2 * p + 1] + string(x - 5, R[2 * p]);
+					string S = "";
+					return S + R[2 * p] + R[2 * p + 2];
+				}
+				string Solution::intToRoman(int A) {
+					int num[4];
+					string S = "";
+					for (int i = 3; i >= 0; i--) {
+						S += roman((A % (int)pow(10, i + 1)) / pow(10, i), i);
+					}
+					return S;
+				}
+			}
+			{
+				/*
+				Roman To Integer
+				https://www.interviewbit.com/problems/roman-to-integer/
+
+				#Famous
+				*/
+				int romanCharToInt(char c) {
+					switch (c) {
+					case 'I':   return 1;
+					case 'V':   return 5;
+					case 'X':   return 10;
+					case 'L':   return 50;
+					case 'C':   return 100;
+					case 'D':   return 500;
+					case 'M':   return 1000;
+					default:    return 0;
+					}
+				}
+				int Solution::romanToInt(string s) {
+					int num = 0;
+					int size = s.size();
+
+					for (int i = 0; i < size; i++) {
+						if (i < (size - 1) && romanCharToInt(s[i]) < romanCharToInt(s[i + 1])) {
+							num -= romanCharToInt(s[i]);
+						} else {
+							num += romanCharToInt(s[i]);
+						}
+					}
+					return num;
+				}
+			}
+			{
+				/*
+				Add Binary Strings
+				https://www.interviewbit.com/problems/add-binary-strings/
+				*/
+				string Solution::addBinary(string A, string B) {
+					if (A.length() < B.length()) {
+						swap(A, B);
+					}
+					int n = A.length(), m = B.length();
+					B = string(n - m, '0') + B;
+					int carry = 0, temp = 0;
+					for (int i = n - 1; i >= 0; i--) {
+						temp = A[i] - '0' + B[i] - '0' + carry;
+						if (temp == 3) {
+							carry = 1;
+						} else if (temp == 2) {
+							A[i] = '0';
+							carry = 1;
+						} else {
+							A[i] = '0' + temp;
+							carry = 0;
+						}
+					}
+					if (carry == 1) {
+						A = '1' + A;
+					}
+					return A;
+				}
+			}
+			{
+				/*
+				Power of 2
+				https://www.interviewbit.com/problems/power-of-2/
+				*/
+				string half(string A) {
+					string B = A;
+					int carry = 0;
+					for (int i = 0; i < A.length(); i++) {
+						B[i] = '0' + (A[i] - '0' + carry) / 2;
+						carry = ((A[i] - '0' + carry) % 2) * 10;
+					}
+					if (B[0] == '0') {
+						return B.substr(1, B.length() - 1);
+					}
+					return B;
+				}
+				int Solution::power(string A) {
+					int n = A.size();
+					int temp = A[A.length() - 1] - '0';
+					while (temp % 2 == 0) {
+						A = half(A);
+						if (A == "1") {
+							return 1;
+						}
+						temp = A[A.length() - 1] - '0';
+					}
+					return 0;
+				}
+			}
+			{
+				/*
+				Multiply Strings
+				https://www.interviewbit.com/problems/multiply-strings/
+				*/
+				string Solution::multiply(string A, string B) {
+					int m = A.size(), n = B.size();
+					string ans(m + n, '0');
+
+					for (int i = m - 1; i >= 0; --i) {
+						for (int j = n - 1; j >= 0; --j) {
+							int sum = (A[i] - '0') * (B[j] - '0') + (ans[i + j + 1] - '0');
+							ans[i + j + 1] = (sum % 10) + '0';
+							ans[i + j] += (sum / 10);
+						}
+					}
+
+					for (int i = 0; i < m + n; ++i) {
+						if (ans[i] != '0')
+							return ans.substr(i);
+					}
+					return "0";
+				}
+			}
+		}
+		// String Parsing
+		{
+			{
+				/*
+				Compare Version Numbers
+				https://www.interviewbit.com/problems/compare-version-numbers/
+
+				#Good
+				*/
+				int Solution::compareVersion(string A, string B) {
+					int j, i;
+					for ( i = 0, j = 0 ; i < A.size() || j < B.size() ; i++, j++) {
+						unsigned long long num1 = 0, num2 = 0;
+						while (i < A.size() && A[i] != '.') {
+							num1 *= 10;
+							num1 += A[i] - '0';
+							i++;
+						}
+						while (j < B.size() && B[j] != '.') {
+							num2 *= 10;
+							num2 += B[j] - '0';
+							j++;
+						}
+						if (num1 > num2) return 1;
+						if (num1 < num2) return -1;
+					}
+					return 0;
+				}
+			}
+			{
+				/*
+				Atoi
+				https://www.interviewbit.com/problems/atoi/
+
+				#Revise
+				*/
+				int Solution::atoi(const string & str) {
+					if (str == "") return 0;
+					stringstream ss(str);
+					int ret;
+					ss >> ret;
+					return ret;
+				}
+			}
+		}
+	}
+// Math
+	{
+		// Adhoc
+		{
+			{
+				/*
+				Verify Prime
+				https://www.interviewbit.com/problems/verify-prime/
+				*/
+				int Solution::isPrime(int A) {
+					if (A <= 1) {
+						return 0;
+					}
+					int s = (int) sqrt(A);
+					for (int i = 2; i <= s; i++) {
+						if (A % i == 0) {
+							return 0;
+						}
+					}
+					return 1;
+				}
+			}
+			{
+				/*
+				Sum of pairwise Hamming Distance
+				https://www.interviewbit.com/problems/sum-of-pairwise-hamming-distance/
+
+				#Good
+				*/
+				long long mod = 1000000007;
+				int Solution::hammingDistance(const vector<int> &A) {
+					long long ans = 0, x = 1, n = A.size();
+					while (x > 0) {
+						long long count = 0;
+						for (int i = 0; i < n; i++) {
+							if ((A[i]&x) > 0)count++;
+						}
+						ans += 2LL * (count * (n - count));
+						ans %= mod;
+						x <<= 1;
+					}
+					return ans;
+				}
+			}
+			{
+
 			}
 		}
 	}
@@ -8279,25 +8803,25 @@
 
 
 
-	1. The Two Egg Problem
+1. The Two Egg Problem
 
-	2. Second Largest Item in BST
+2. Second Largest Item in BST
 
-	3. The Cake Thief
+3. The Cake Thief
 
-	4. Find Duplicate, Space Edition
+4. Find Duplicate, Space Edition
 
-	5. Reverse a Linked List
+5. Reverse a Linked List
 
-	6. Getting Rich on Apple Stocks
+6. Getting Rich on Apple Stocks
 
-	7. Word Cloud Data Generator
+7. Word Cloud Data Generator
 
-	8. Simulate a 7 - Sided Die Using a 5 - Sided Die
+8. Simulate a 7 - Sided Die Using a 5 - Sided Die
 
-	9. Find Duplicate Files After Malicious Attack
+9. Find Duplicate Files After Malicious Attack
 
-	10. Girl Scout Cookie Conspiracy
+10. Girl Scout Cookie Conspiracy
 
 
 
