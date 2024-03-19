@@ -3086,22 +3086,6 @@
 					trav(A, B);
 					return ans;
 				}
-				int num, ans;
-				void trav(TreeNode * A, int &B) {
-					if (!A)return;
-					trav(A->left, B);
-					num++;
-					if (num == B) {
-						ans = A->val;
-						return;
-					}
-					trav(A->right, B);
-				}
-				int Solution::kthsmallest(TreeNode * A, int B) {
-					num = 0;
-					trav(A, B);
-					return ans;
-				}
 			}
 			{
 				/*
@@ -3601,43 +3585,39 @@
 
 				#Famous #Revise
 				*/
-				TreeNode * build(vector<int> &A, vector<int> &B, int a, int b, int root) {
+				TreeNode * build(vector<int> &Preorder, vector<int> &Inorder, int a, int b, int root) {
 					if (a > b)return NULL;
 					int i = a;
-					while (i <= b) {
-						if (A[root] == B[i]) break;
-						i++;
-					}
-					TreeNode* S = new TreeNode(B[i]);
-					S->left = build(A, B, a, i - 1, root + 1);
-					S->right = build(A, B, i + 1, b, root + i - a + 1);
+					while (Preorder[root] != Inorder[i]) i++;
+					TreeNode* S = new TreeNode(Inorder[i]);
+					S->left = build(Preorder, Inorder, a, i - 1, root + 1);
+					S->right = build(Preorder, Inorder, i + 1, b, root + i - a + 1);
 					return S;
 				}
-				TreeNode* Solution::buildTree(vector<int> &A, vector<int> &B) {
-					return build(A, B, 0, A.size() - 1, 0);
+				TreeNode* Solution::buildTree(vector<int> &Preorder, vector<int> &Inorder) {
+					return build(Preorder, Inorder, 0, Preorder.size() - 1, 0);
 				}
 			}
 			{
 				/*
-				Construct Binary Tree From Inorder And Preorder
-				https://www.interviewbit.com/problems/construct-binary-tree-from-inorder-and-preorder/
+				Binary Tree From Inorder And Postorder
+				https://www.interviewbit.com/problems/binary-tree-from-inorder-and-postorder/
 
 				#Famous #Revise
 				*/
-				TreeNode * build(vector<int> &A, vector<int> &B, int a, int b, int root) {
-					if (a > b)return NULL;
-					int i = a;
-					while (i <= b) {
-						if (A[root] == B[i]) break;
-						i++;
-					}
-					TreeNode* S = new TreeNode(B[i]);
-					S->left = build(A, B, a, i - 1, root + 1);
-					S->right = build(A, B, i + 1, b, root + i - a + 1);
-					return S;
+				TreeNode * buildTree(vector<int>& inorder, vector<int>& postorder) {
+					return build(inorder, postorder, 0, inorder.size() - 1, 0, postorder.size() - 1);
 				}
-				TreeNode* Solution::buildTree(vector<int> &A, vector<int> &B) {
-					return build(A, B, 0, A.size() - 1, 0);
+
+				TreeNode * build(vector<int>& inorder, vector<int>& postorder, int inStart, int inEnd, int postStart, int postEnd) {
+					if (inStart > inEnd) return nullptr;
+					TreeNode* root = new TreeNode(postorder[postEnd]);
+					int index = inStart;
+					while (inorder[index] != root->val) index++;
+					int leftLen = index - inStart;
+					root->left = build(inorder, postorder, inStart, index - 1, postStart, postStart + leftLen - 1);
+					root->right = build(inorder, postorder, index + 1, inEnd, postStart + leftLen, postEnd - 1);
+					return root;
 				}
 			}
 		}
@@ -4182,40 +4162,11 @@
 
 					#Famous #Revise
 					*/
-					{
-						TreeNode * lowestCommonAncestor(TreeNode * root, TreeNode * p, TreeNode * q) {
-							if (root == NULL || root == p || root == q) return root;
-							TreeNode* left = lowestCommonAncestor(root->left, p, q), *right = lowestCommonAncestor(root->right, p, q);
-
-							if (left == NULL) {
-								return right;
-							} else if (right == NULL) {
-								return left;
-							} else {
-								return root;
-							}
-						}
-					}
-					{
-						pair<bool, bool> helper(TreeNode * root, int &ans, const int &val1, const int &val2) {
-							if (root == NULL) return {0, 0};
-							auto left = helper(root->left, ans, val1, val2);
-							auto right = helper(root->right, ans, val1, val2);
-							if (ans != -1) return {0, 0};
-							pair<bool, bool> ret = {root->val == val1 || left.first || right.first,
-							                        root->val == val2 || left.second || right.second
-							                       };
-							if (ret.first && ret.second) {
-								ans = root->val;
-							}
-							return ret;
-						}
-
-						int Solution::lca(TreeNode * A, int val1, int val2) {
-							int ans = -1;
-							helper(A, ans, val1, val2);
-							return ans;
-						}
+					TreeNode * lowestCommonAncestor(TreeNode * root, TreeNode * p, TreeNode * q) {
+						if (root == NULL || root == p || root == q) return root;
+						TreeNode* left = lowestCommonAncestor(root->left, p, q);
+						TreeNode* right = lowestCommonAncestor(root->right, p, q);
+						return left == NULL ? right : left
 					}
 				}
 				{
@@ -4315,8 +4266,7 @@
 					sort(B.begin(), B.end(), greater<int>());
 					int n = A.size();
 					priority_queue<tuple<int, int, int> > pq;
-					for (int i = 0; i < n; i++)
-					{
+					for (int i = 0; i < n; i++){
 						pq.push({A[i] + B[0], i , 0});
 					}
 					vector<int> ans;
@@ -4538,7 +4488,7 @@
 			}
 			{
 				/*
-				Longest Subarray Length: You need to find the length of the longest subarray having count of 1’s one more than count of 0’s.
+				Longest Subarray Length: You need to find the length of the longest subarray having count of 1’s only one more than count of 0’s.
 				https://www.interviewbit.com/problems/longest-subarray-length/
 
 				#Famous #MustRevise #Revise
@@ -5464,7 +5414,6 @@
 		}
 		//Permutations
 		{
-			//Permutations
 			{
 				/*
 				Permutations
@@ -8800,37 +8749,6 @@
 		}
 	}
 }
-
-
-
-1. The Two Egg Problem
-
-2. Second Largest Item in BST
-
-3. The Cake Thief
-
-4. Find Duplicate, Space Edition
-
-5. Reverse a Linked List
-
-6. Getting Rich on Apple Stocks
-
-7. Word Cloud Data Generator
-
-8. Simulate a 7 - Sided Die Using a 5 - Sided Die
-
-9. Find Duplicate Files After Malicious Attack
-
-10. Girl Scout Cookie Conspiracy
-
-
-
-
-
-
-
-
-
 
 
 
