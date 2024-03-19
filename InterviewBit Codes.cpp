@@ -1336,7 +1336,7 @@
 				#Famous #TopDown #AlgoExample #Memoisation
 				*/
 				int pal(string & A, int s, int e, vector<vector<int>> &dp) {
-					if (dp[s][e] != -1)return dp[s][e];
+					if (dp[s][e] != -1) return dp[s][e];
 					int ans;
 					if (s + 1 == e) {
 						if (A[s] == A[e]) {
@@ -3050,17 +3050,17 @@
 				#Famous
 				*/
 				int Solution::solve(vector<int> &A) {
-					stack<int>st;
+					stack<int> s;
 					int root = INT_MIN;
 					for (int i = 0; i < A.size(); i++) {
-						if (!st.empty() && A[i] > st.top()) {
-							root = st.top();
-							st.pop();
+						if (A[i] < root) return false;
+						while (!s.empty() && A[i] > s.top()) {
+							root = s.top();
+							s.pop();
 						}
-						if (A[i] < root) return 0;
-						st.push(A[i]);
+						s.push(A[i]);
 					}
-					return 1;
+					return true;
 				}
 			}
 			{
