@@ -4266,7 +4266,7 @@
 					sort(B.begin(), B.end(), greater<int>());
 					int n = A.size();
 					priority_queue<tuple<int, int, int> > pq;
-					for (int i = 0; i < n; i++){
+					for (int i = 0; i < n; i++) {
 						pq.push({A[i] + B[0], i , 0});
 					}
 					vector<int> ans;
@@ -4823,6 +4823,28 @@
 					return ans + 1;
 				}
 			}
+			{
+				/*
+				Find the Duplicate Number
+				https://leetcode.com/problems/find-the-duplicate-number/description/
+
+				#Famous #Good
+				*/
+				int findDuplicate(vector<int>& nums) {
+					int duplicate = -1, n = nums.size();
+					for (int i = 0; i < n; i++) {
+						int curr = abs(nums[i]);
+						if (nums[curr - 1] < 0) {
+							duplicate = curr;
+							break;
+						}
+						nums[curr - 1] *= -1;
+					}
+					for (auto &num : nums) num = abs(num);
+					return duplicate;
+				}
+
+			}
 		}
 		//Incremental Hash
 		{
@@ -4995,12 +5017,21 @@
 					string minWindow(string s, string t) {
 						vector<int> map(128, 0);
 						for (auto c : t) map[c]++;
-						int counter = t.size(), begin = 0, end = 0, d = INT_MAX, head = 0;
+						int remaining = t.size(), begin = 0, end = 0, d = INT_MAX, head = 0;
 						while (end < s.size()) {
-							if (map[s[end++]]-- > 0) counter--; //in t
-							while (counter == 0) { //valid
-								if (end - begin < d)  d = end - (head = begin);
-								if (map[s[begin++]]++ == 0) counter++; //make it invalid
+							int &countE = map[s[end]];
+							if (countE > 0) remaining--; //in t
+							countE--;
+							end++;
+							while (remaining == 0) { //valid
+								if (end - begin < d)  {
+									d = end - begin;
+									head = begin;
+								}
+								int &countS = map[s[begin]];
+								if (countS == 0) remaining++; //make it invalid
+								countS++;
+								begin++;
 							}
 						}
 						return d == INT_MAX ? "" : s.substr(head, d);
@@ -5036,19 +5067,21 @@
 	{
 		// Example
 		{
-			/*
-			Reverse Link List Recursion
-			https://www.interviewbit.com/problems/reverse-link-list-recursion
+			{
+				/*
+				Reverse Link List Recursion
+				https://www.interviewbit.com/problems/reverse-link-list-recursion
 
-			#Good
-			*/
-			ListNode* Solution::reverseList(ListNode * A) {
-				if (!A || !A->next) return A;
-				ListNode* next = A->next;
-				A->next = NULL;
-				ListNode* head = reverseList(next);
-				next->next = A;
-				return head;
+				#Famous #Good
+				*/
+				ListNode* Solution::reverseList(ListNode * A) {
+					if (!A || !A->next) return A;
+					ListNode* next = A->next;
+					A->next = NULL;
+					ListNode* head = reverseList(next);
+					next->next = A;
+					return head;
+				}
 			}
 			{
 				/*
@@ -6535,2220 +6568,2219 @@
 						return 0; // No pair found with difference B
 					}
 				}
-			}
-			{
-				/*
-				3 Sum
-				https://www.interviewbit.com/problems/3-sum/
+				{
+					/*
+					3 Sum
+					https://www.interviewbit.com/problems/3-sum/
 
-				#Revise
-				*/
-				int Solution::threeSumClosest(vector<int> &A, int B) {
-					sort(A.begin(), A.end());
-					int closest = A[0] + A[1] + A[2];
-					for (int left = 0; left < A.size() - 2; left++) {
-						int right = A.size() - 1, mid = left + 1; // Because here we are checking for (A[i] + A[j])
-						while (mid < right) {
-							int temp = A[left] + A[mid] + A[right];
-							if (abs(temp - B) < abs(closest - B)) {
-								closest = temp;
+					#Revise
+					*/
+					int Solution::threeSumClosest(vector<int> &A, int B) {
+						sort(A.begin(), A.end());
+						int closest = A[0] + A[1] + A[2];
+						for (int left = 0; left < A.size() - 2; left++) {
+							int right = A.size() - 1, mid = left + 1; // Because here we are checking for (A[i] + A[j])
+							while (mid < right) {
+								int temp = A[left] + A[mid] + A[right];
+								if (abs(temp - B) < abs(closest - B)) {
+									closest = temp;
+								}
+								if (temp < B) {
+									mid++;
+								} else if (temp > B) {
+									right--;
+								} else {
+									return B;
+								}
 							}
-							if (temp < B) {
-								mid++;
-							} else if (temp > B) {
-								right--;
+						}
+						return closest;
+					}
+				}
+				{
+					/*
+					Counting Triangles
+					https://www.interviewbit.com/problems/counting-triangles/
+
+					#Good
+					*/
+					int Solution::nTriang(vector<int> &A) {
+						sort(A.begin(), A.end());
+						int n = A.size();
+						long long cnt = 0;
+						for (int i = n - 1; i >= 2; i--) {
+							int l = 0, r = i - 1;
+							while (l < r) {
+								if (A[l] + A[r] > A[i]) {
+									cnt = cnt + r - l;
+									cnt = cnt % 1000000007;
+									r--;
+								}
+								else l++;
+							}
+						}
+						return cnt;
+					}
+				}
+				{
+					/*
+					Diffk
+					https://www.interviewbit.com/problems/diffk/
+
+					#Revise
+					*/
+					int Solution::diffPossible(vector<int> &A, int B) {
+						int l = 0, r = 1;
+						while (r < A.size()) {
+							if (A[r] - A[l] < B) {
+								r++;
+							} else if (A[r] - A[l] > B) {
+								l++;
 							} else {
-								return B;
+								if (l == r) r++;
+								else return 1;
 							}
 						}
+						return 0;
 					}
-					return closest;
 				}
 			}
+			// Tricks
 			{
-				/*
-				Counting Triangles
-				https://www.interviewbit.com/problems/counting-triangles/
+				{
+					/*
+					Maximum Ones After Modification
+					https://www.interviewbit.com/problems/maximum-ones-after-modification/
 
-				#Good
-				*/
-				int Solution::nTriang(vector<int> &A) {
-					sort(A.begin(), A.end());
-					int n = A.size();
-					long long cnt = 0;
-					for (int i = n - 1; i >= 2; i--) {
-						int l = 0, r = i - 1;
-						while (l < r) {
-							if (A[l] + A[r] > A[i]) {
-								cnt = cnt + r - l;
-								cnt = cnt % 1000000007;
-								r--;
-							}
-							else l++;
-						}
-					}
-					return cnt;
-				}
-			}
-			{
-				/*
-				Diffk
-				https://www.interviewbit.com/problems/diffk/
-
-				#Revise
-				*/
-				int Solution::diffPossible(vector<int> &A, int B) {
-					int l = 0, r = 1;
-					while (r < A.size()) {
-						if (A[r] - A[l] < B) {
-							r++;
-						} else if (A[r] - A[l] > B) {
-							l++;
-						} else {
-							if (l == r) r++;
-							else return 1;
-						}
-					}
-					return 0;
-				}
-			}
-		}
-		// Tricks
-		{
-			{
-				/*
-				Maximum Ones After Modification
-				https://www.interviewbit.com/problems/maximum-ones-after-modification/
-
-				#Good
-				*/
-				int Solution::solve(vector<int> &A, int B) {
-					int l = -1, r = 0, length = 0, zeros = 0;
-					while (r < A.size()) {
-						if (A[r] == 1) {
-							length = max(length, r - l);
-						} else if (A[r] == 0) {
-							zeros++;
-							if (zeros <= B) {
+					#Good
+					*/
+					int Solution::solve(vector<int> &A, int B) {
+						int l = -1, r = 0, length = 0, zeros = 0;
+						while (r < A.size()) {
+							if (A[r] == 1) {
 								length = max(length, r - l);
+							} else if (A[r] == 0) {
+								zeros++;
+								if (zeros <= B) {
+									length = max(length, r - l);
+								} else {
+									l++;
+									while (l <= r && A[l] == 1) {
+										l++;
+									}
+									zeros--;
+								}
+							}
+							r++;
+						}
+						return length;
+					}
+				}
+				{
+					/*
+					Counting Subarrays! You need to find the number of subarrays in A having sum less than B
+					https://www.interviewbit.com/problems/counting-subarrays/
+					*/
+					// Easy to understand
+					{
+						int Solution::solve(vector<int> &A, int B) {
+							int n = A.size(), count = 0, sum = 0, j = 0;
+
+							for (int i = 0; i < n; i++) {
+								sum += A[i];
+								while (sum >= B) {
+									sum -= A[j];
+									j++;
+								}
+								count += i - j + 1;
+							}
+							return count;
+						}
+					}
+					// Good
+					{
+						int Solution::solve(vector<int> &A, int B) {
+							int l = -1, r = -1, count = 0, sum = 0, n = A.size();
+							while (r < n) {
+								if (sum < B) {
+									count += r - l;
+									r++;
+									sum += A[r];
+								} else {
+									l++;
+									sum -= A[l];
+								}
+							}
+							return count;
+						}
+					}
+				}
+				{
+					/*
+					Subarrays with distinct integers!
+					https://www.interviewbit.com/problems/subarrays-with-distinct-integers/
+
+					#Good
+					*/
+					int helper(vector<int> &a, int b) {
+						int res = 0;
+						int left = 0, right = 0;
+						unordered_map<int, int> m;
+						while (right < a.size()) {
+							m[a[right]]++;
+							while (m.size() > b) {
+								m[a[left]]--;
+								if (m[a[left]] == 0) m.erase(a[left]);
+								left++;
+							}
+							res += right - left + 1;
+							right++;
+						}
+						return res;
+					}
+
+					int Solution::solve(vector<int> &a, int b) {
+						return helper(a, b) - helper(a, b - 1);
+					}
+				}
+				{
+					/*
+					Array 3 Pointers
+					https://www.interviewbit.com/problems/array-3-pointers/
+
+					#Good
+					*/
+					int Solution::minimize(const vector<int> &A, const vector<int> &B, const vector<int> &C) {
+						int i = 0, j = 0, k = 0;
+						int temp, mini = INT_MAX;
+						while (i < A.size() && j < B.size() && k < C.size()) {
+							temp = max({abs(A[i] - B[j]), abs(A[i] - C[k]), abs(B[j] - C[k])});
+							mini = min(temp, mini);
+
+							if (A[i] <= B[j] && A[i] <= C[k]) {
+								i++;
+							} else if (A[i] >= B[j] && B[j] <= C[k]) {
+								j++;
+							} else if (A[i] >= C[k] && B[j] >= C[k]) {
+								k++;
+							}
+						}
+						return mini;
+					}
+				}
+				{
+					/*
+					Container With Most Water
+					https://www.interviewbit.com/problems/container-with-most-water/
+
+					#Famous #Good #Revise
+					*/
+					int Solution::maxArea(vector<int> &A) {
+						int n = A.size();
+						int maxarea = 0, area;
+						int l = 0, r = n - 1;
+						while (l < r) {
+							area = (r - l) * min(A[l], A[r]);
+							maxarea = max(area, maxarea);
+							if (A[l] > A[r]) {
+								r--;
 							} else {
 								l++;
-								while (l <= r && A[l] == 1) {
-									l++;
-								}
-								zeros--;
 							}
 						}
-						r++;
+						return maxarea;
 					}
-					return length;
 				}
 			}
+			// Multiple Arrays
 			{
-				/*
-				Counting Subarrays! You need to find the number of subarrays in A having sum less than B
-				https://www.interviewbit.com/problems/counting-subarrays/
-				*/
-				// Easy to understand
 				{
-					int Solution::solve(vector<int> &A, int B) {
-						int n = A.size(), count = 0, sum = 0, j = 0;
+					/*
+					Merge Two Sorted Lists II
+					https://www.interviewbit.com/problems/merge-two-sorted-lists-ii/
 
-						for (int i = 0; i < n; i++) {
-							sum += A[i];
-							while (sum >= B) {
-								sum -= A[j];
+					#Good
+					*/
+					void Solution::merge(vector<int> &A, vector<int> &B) {
+						int a = A.size() - 1, b = B.size() - 1;
+						A.resize(A.size() + B.size());
+						int i = a + b + 1;
+						while (b >= 0) {
+							if (a == -1 || B[b] > A[a]) {
+								A[i] = B[b];
+								i--;
+								b--;
+							} else {
+								A[i] = A[a];
+								i--;
+								a--;
+							}
+						}
+						return ;
+					}
+				}
+				{
+					/*
+					Intersection Of Sorted Arrays
+					https://www.interviewbit.com/problems/intersection-of-sorted-arrays/
+					*/
+					vector<int> Solution::intersect(const vector<int> &A, const vector<int> &B) {
+						int a = 0, b = 0;
+						vector<int> S;
+						while (a < A.size() && b < B.size()) {
+							if (A[a] < B[b]) {
+								a++;
+							} else if (A[a] > B[b]) {
+								b++;
+							} else {
+								S.push_back(A[a]);
+								a++;
+								b++;
+							}
+						}
+						return S;
+					}
+				}
+			}
+			// Inplace Update
+			{
+				{
+					/*
+					Remove Duplicates from Sorted Array
+					https://www.interviewbit.com/problems/remove-duplicates-from-sorted-array/
+
+					#Famous
+					*/
+					int Solution::removeDuplicates(vector<int> &A) {
+						int j = 1;
+						for (int i = 1; i < A.size(); i++) {
+							if (A[i] != A[i - 1]) {
+								A[j] = A[i];
 								j++;
 							}
-							count += i - j + 1;
 						}
-						return count;
+						return j;
 					}
 				}
-				// Good
 				{
-					int Solution::solve(vector<int> &A, int B) {
-						int l = -1, r = -1, count = 0, sum = 0, n = A.size();
-						while (r < n) {
-							if (sum < B) {
-								count += r - l;
-								r++;
-								sum += A[r];
-							} else {
-								l++;
-								sum -= A[l];
-							}
-						}
-						return count;
-					}
-				}
-			}
-			{
-				/*
-				Subarrays with distinct integers!
-				https://www.interviewbit.com/problems/subarrays-with-distinct-integers/
+					/*
+					Remove Duplicates from Sorted Array II
+					https://www.interviewbit.com/problems/remove-duplicates-from-sorted-array-ii/
 
-				#Good
-				*/
-				int helper(vector<int> &a, int b) {
-					int res = 0;
-					int left = 0, right = 0;
-					unordered_map<int, int> m;
-					while (right < a.size()) {
-						m[a[right]]++;
-						while (m.size() > b) {
-							m[a[left]]--;
-							if (m[a[left]] == 0) m.erase(a[left]);
-							left++;
-						}
-						res += right - left + 1;
-						right++;
-					}
-					return res;
-				}
-
-				int Solution::solve(vector<int> &a, int b) {
-					return helper(a, b) - helper(a, b - 1);
-				}
-			}
-			{
-				/*
-				Array 3 Pointers
-				https://www.interviewbit.com/problems/array-3-pointers/
-
-				#Good
-				*/
-				int Solution::minimize(const vector<int> &A, const vector<int> &B, const vector<int> &C) {
-					int i = 0, j = 0, k = 0;
-					int temp, mini = INT_MAX;
-					while (i < A.size() && j < B.size() && k < C.size()) {
-						temp = max({abs(A[i] - B[j]), abs(A[i] - C[k]), abs(B[j] - C[k])});
-						mini = min(temp, mini);
-
-						if (A[i] <= B[j] && A[i] <= C[k]) {
-							i++;
-						} else if (A[i] >= B[j] && B[j] <= C[k]) {
-							j++;
-						} else if (A[i] >= C[k] && B[j] >= C[k]) {
-							k++;
-						}
-					}
-					return mini;
-				}
-			}
-			{
-				/*
-				Container With Most Water
-				https://www.interviewbit.com/problems/container-with-most-water/
-
-				#Famous #Good #Revise
-				*/
-				int Solution::maxArea(vector<int> &A) {
-					int n = A.size();
-					int maxarea = 0, area;
-					int l = 0, r = n - 1;
-					while (l < r) {
-						area = (r - l) * min(A[l], A[r]);
-						maxarea = max(area, maxarea);
-						if (A[l] > A[r]) {
-							r--;
-						} else {
-							l++;
-						}
-					}
-					return maxarea;
-				}
-			}
-		}
-		// Multiple Arrays
-		{
-			{
-				/*
-				Merge Two Sorted Lists II
-				https://www.interviewbit.com/problems/merge-two-sorted-lists-ii/
-
-				#Good
-				*/
-				void Solution::merge(vector<int> &A, vector<int> &B) {
-					int a = A.size() - 1, b = B.size() - 1;
-					A.resize(A.size() + B.size());
-					int i = a + b + 1;
-					while (b >= 0) {
-						if (a == -1 || B[b] > A[a]) {
-							A[i] = B[b];
-							i--;
-							b--;
-						} else {
-							A[i] = A[a];
-							i--;
-							a--;
-						}
-					}
-					return ;
-				}
-			}
-			{
-				/*
-				Intersection Of Sorted Arrays
-				https://www.interviewbit.com/problems/intersection-of-sorted-arrays/
-				*/
-				vector<int> Solution::intersect(const vector<int> &A, const vector<int> &B) {
-					int a = 0, b = 0;
-					vector<int> S;
-					while (a < A.size() && b < B.size()) {
-						if (A[a] < B[b]) {
-							a++;
-						} else if (A[a] > B[b]) {
-							b++;
-						} else {
-							S.push_back(A[a]);
-							a++;
-							b++;
-						}
-					}
-					return S;
-				}
-			}
-		}
-		// Inplace Update
-		{
-			{
-				/*
-				Remove Duplicates from Sorted Array
-				https://www.interviewbit.com/problems/remove-duplicates-from-sorted-array/
-
-				#Famous
-				*/
-				int Solution::removeDuplicates(vector<int> &A) {
-					int j = 1;
-					for (int i = 1; i < A.size(); i++) {
-						if (A[i] != A[i - 1]) {
-							A[j] = A[i];
-							j++;
-						}
-					}
-					return j;
-				}
-			}
-			{
-				/*
-				Remove Duplicates from Sorted Array II
-				https://www.interviewbit.com/problems/remove-duplicates-from-sorted-array-ii/
-
-				#Famous #Good
-				*/
-				int Solution::removeDuplicates(vector<int> &A) {
-					int count = 0, n = A.size();
-					for (int i = 0; i < n; i++) {
-						if (i < n - 2 && A[i] == A[i + 1] && A[i] == A[i + 2]) continue;
-						else {
-							A[count] = A[i];
-							count++;
-						}
-					}
-					return count;
-				}
-			}
-			{
-				/*
-				Sort by Color
-				https://www.interviewbit.com/problems/sort-by-color/
-
-				#Good #Revise
-				*/
-				void Solution::sortColors(vector<int> &A) {
-					int i = -1, k = A.size();
-					for (int j = 0; j < A.size() && j < k; j++) {
-						if (A[j] < 1) {
-							i++;
-							swap(A[i], A[j]);
-						}
-						else if (A[j] > 1) {
-							k--;
-							swap(A[k], A[j]);
-							j--;
-						}
-					}
-				}
-			}
-		}
-	}
-// Binary Search
-	/*
-	https://leetcode.com/discuss/study-guide/786126/Python-Powerful-Ultimate-Binary-Search-Template.-Solved-many-problems
-	*/
-	{
-		//Simple Binary Search
-		{
-			{
-				/*
-				Search in Bitonic Array!
-				https://www.interviewbit.com/problems/search-in-bitonic-array/
-				*/
-				int Solution::solve(vector<int> &A, int B) {
-					int start = 1, n = A.size(), end = n - 1, mid;
-					while (start <= end) {
-						mid = start + (end - start) / 2;
-						if (A[mid] > A[mid - 1] && A[mid] < A[mid + 1]) {
-							start = mid + 1;
-						} else if (A[mid] < A[mid - 1] && A[mid] > A[mid + 1]) {
-							end = mid - 1;
-						} else {
-							break;
-						}
-					}
-					int bitonic = mid;
-					start = 0, end = bitonic;
-					while (start <= end) {
-						mid = start + (end - start) / 2;
-						if (A[mid] < B) {
-							start = mid + 1;
-						} else if (A[mid] > B) {
-							end = mid - 1;
-						} else {
-							return mid;
-						}
-					}
-					start = bitonic + 1, end = n - 1;
-					while (start <= end) {
-						mid = start + (end - start) / 2;
-						if (A[mid] > B) {
-							start = mid + 1;
-						} else if (A[mid] < B) {
-							end = mid - 1;
-						} else {
-							return mid;
-						}
-					}
-					return -1;
-				}
-			}
-			{
-				/*
-				Smaller or equal elements
-				https://www.interviewbit.com/problems/smaller-or-equal-elements/
-				*/
-				int Solution::solve(vector<int> &A, int B) {
-					int l = 0, r = A.size() - 1, count = 0;
-					while (l <= r) {
-						int mid = l + (r - l) / 2;
-						if (A[mid] <= B) {
-							count = mid + 1;
-							l = mid + 1;
-						} else {
-							r = mid - 1;
-						}
-					}
-					return count;
-				}
-			}
-			{
-				/*
-				WoodCutting Made Easy!
-				https://www.interviewbit.com/problems/woodcutting-made-easy/
-
-				#Good
-				*/
-				bool check(vector < int > & A, int val, int B) {
-					int rem = 0;
-					int n = A.size();
-					for (int i = 0; i < n; i++) {
-						if (A[i] > val) rem += A[i] - val;
-					}
-					if (rem >= B) return true;
-					return false;
-				}
-				int Solution::solve(vector < int > & A, int B) {
-					int low = 0;
-					int high = 1000000;
-					int ans = 0;
-					while (low <= high) {
-						int mid = (low + high) / 2;
-						if (check(A, mid, B)) {
-							ans = mid;
-							low = mid + 1;
-						} else high = mid - 1;
-					}
-					return ans;
-				}
-			}
-			{
-				/*
-				Matrix Search
-				https://www.interviewbit.com/problems/matrix-search/
-				*/
-				// Better
-				{
-					int Solution::searchMatrix(vector<vector<int> > &A, int B) {
-						int r1 = 0, r2 = A.size() - 1, mid, n = A[0].size();
-						while (r1 <= r2) {
-							mid = r1 + (r2 - r1) / 2;
-							if (A[mid][0] > B) {
-								r2 = mid - 1;
-							} else if (A[mid][n - 1] < B) {
-								r1 = mid + 1;
-							} else {
-								break;
-							}
-						}
-						vector<int> &D = A[mid];
-						int c1 = 0, c2 = n - 1;
-						while (c1 <= c2) {
-							mid = c1 + (c2 - c1) / 2;
-							if (D[mid] == B) {
-								return 1;
-							} else if (D[mid] > B) {
-								c2 = mid - 1;
-							} else if (D[mid] < B) {
-								c1 = mid + 1;
-							}
-						}
-						return 0;
-					}
-				}
-				// Good
-				{
-					int Solution::searchMatrix(vector<vector<int> > &A, int B) {
-						int N = A.size();
-						int M = A[0].size();
-						int start = 0, end = N * M - 1;
-						while (start <= end) {
-							int mid = start + (end - start) / 2;
-							int x = mid / M;
-							int y = mid % M;
-							if (A[x][y] == B) return 1;
-							if (B < A[x][y]) end = mid - 1;
-							else start = mid + 1;
-						}
-						return 0;
-					}
-				}
-			}
-			{
-				/*
-				Search for a Range
-				https://www.interviewbit.com/problems/search-for-a-range/
-
-				#Revise
-				*/
-				int search(const vector<int> &A, int B, bool first) {
-					int low = 0, high = A.size() - 1, ans = -1;
-					while (low <= high) {
-						int mid = (low + high) / 2;
-						if (A[mid] == B) { ans = mid; if (first) high = mid - 1; else low = mid + 1; }
-						else if (A[mid] < B) low = mid + 1;
-						else high = mid - 1;
-					}
-					return ans;
-				}
-				vector<int> Solution::searchRange(const vector<int> &A, int B) {
-					vector<int> result(2);
-					result[0] = search(A, B, true);
-					result[1] = search(A, B, false);
-					return result;
-				}
-			}
-			{
-				/*
-				Sorted Insert Position
-				https://www.interviewbit.com/problems/sorted-insert-position/
-
-				#LowerBound
-				*/
-				int Solution::searchInsert(vector<int> &A, int B) {
-					int l = 0, r = A.size() - 1, ans = A.size();
-					while (l <= r) {
-						int mid = l + (r - l) / 2;
-						if (A[mid] < B) {
-							l = mid + 1;
-						} else {
-							ans = mid;
-							r = mid - 1;
-						}
-					}
-					return ans;
-				}
-			}
-		}
-		// Search Answer
-		{
-			{
-				/*
-				Square Root of Integer
-				https://www.interviewbit.com/problems/square-root-of-integer/
-				*/
-				int Solution::sqrt(int A) {
-					if (A == 0 || A == 1) {
-						return A;
-					}
-					int start = 1, end = A / 2;
-					while (start <= end) {
-						int mid = start + (end - start) / 2;
-						if (mid > A / mid) {
-							end = mid - 1;
-						} else {
-							start = mid + 1;
-						}
-					}
-					return end;
-				}
-			}
-			{
-				/*
-				Allocate Books
-				https://www.interviewbit.com/problems/allocate-books/
-
-				#Good #Revise
-				*/
-				int check(vector<int> &A, int page) {
-					int count = 1, n = A.size(), temp = 0;
-					for (int i = 0; i < n; i++) {
-						temp += A[i];
-						if (temp > page) {
-							temp = A[i];
-							count++;
-						}
-					}
-					return count;
-				}
-				int Solution::books(vector<int> &A, int B) {
-					if (A.size() < B) {
-						return -1;
-					}
-					int start = *max_element(A.begin(), A.end());
-					int end = INT_MAX, mid;
-					while (start < end) {
-						mid = start + (end - start) / 2;
-						if (check(A, mid) <= B) {
-							end = mid;
-						} else {
-							start = mid + 1;
-						}
-					}
-					return start;
-				}
-			}
-			{
-				/*
-				Painter's Partition Problem
-				https://www.interviewbit.com/problems/painters-partition-problem/
-
-				#Good #Famous
-				*/
-				bool check(long long T, int a, vector<int>& c) {
-					long long cur = 0;
-					int n = c.size(), cnt = 1;
-					for (int i = 0; i < n; i++) {
-						cur += (long long)(c[i]);
-						if (cur > T) {
-							cur = (long long)(c[i]);
-							cnt++;
-						}
-					}
-					return cnt <= a;
-				}
-				int Solution::paint(int a, int b, vector<int> &c) {
-					long long start = (*max_element(c.begin(), c.end())), end = LONG_MAX, mid;
-					while (start <= end) {
-						mid = start + (end - start) / 2;
-						if (check(mid, a, c)) {
-							end = mid - 1;
-						} else {
-							start = mid + 1;
-						}
-					}
-					long long ans = ((b % 10000003) * (start % 10000003)) % 10000003;
-					return ans;
-				}
-			}
-		}
-		//Search Step Simulation
-		{
-			{
-				/*
-				Implement Power Function
-				https://www.interviewbit.com/problems/implement-power-function/
-
-				#Famous
-				*/
-				int Solution::pow(int x, int n, int d) {
-					if (x == 0) return 0;
-
-					int flag = 1;
-					if (x < 0) { x = -x; flag = -1;}
-
-					x = x % d;
-
-					if (n == 0) return 1;
-					if (n == 1) {return (flag == 1) ? x : (d - x);}
-
-					long long ans;
-					long long temp = ((long long int)x * (long long int)x) % d;
-					// cout<<n<<" "<<n/2<<" \n";
-					if (n % 2 == 0) {
-						ans = pow(temp, n / 2 , d) % d;
-					} else {
-						ans = flag * ((long long int)x % d) * pow(temp, n / 2 , d) % d;
-					}
-					// cout<<ans%d<<" "<<temp<<" "<<n<<" \n";
-					return ans % d;
-				}
-			}
-		}
-		// Sort Modification
-		{
-			{
-				/*
-				Median of Two Sorted Arrays
-				https://leetcode.com/problems/median-of-two-sorted-arrays/
-
-				#Famous
-				*/
-				double findMedianSortedArrays(vector<int>& nums1, vector<int>& nums2) {
-					int n1 = nums1.size(), n2 = nums2.size();
-					if (n1 < n2) return findMedianSortedArrays(nums2, nums1);
-					if (n2 == 0) {
-						if (n1 == 1) return nums1[0];
-						if (n1 % 2 == 0) {
-							return (double)(nums1[n1 / 2 - 1] + nums1[n1 / 2]) / 2;
-						}
-						return nums1[n1 / 2];
-					}
-					int total_n = n1 + n2;
-					int l1 = 0, r1 = n1 - 1, m1;
-					int l2 = 0, r2 = n2 - 1, m2;
-
-					while (l1 <= r1) {
-						m1 = (l1 + r1) / 2;
-						m2 = (total_n + 1) / 2 - m1 - 2;
-
-						int n1max = (m1 + 1 >= n1) ? INT_MAX : nums1[m1 + 1];
-						int n1min = (m1 < 0) ? INT_MIN : nums1[m1];
-
-						int n2max = (m2 + 1 >= n2) ? INT_MAX : nums2[m2 + 1];
-						int n2min = (m2 < 0) ? INT_MIN : nums2[m2];
-
-						if (n1min <= n2max && n2min <= n1max) {
-							if (total_n % 2 == 0) {
-								return (double)(max(n1min, n2min) + min(n1max, n2max)) / 2;
-							} else {
-								return min(n1max, n2max);
-							}
-						} else if (n1min > n2max) {
-							r1 = m1 - 1;
-						} else {
-							l1 = m1 + 1;
-						}
-					}
-					return 0;
-				}
-			}
-		}
-	}
-// Arrays
-	{
-		// Array Math
-		{
-			{
-				/*
-				Pick from both sides!
-				https://www.interviewbit.com/problems/pick-from-both-sides/
-				*/
-				int sum(vector<int> &A, int i, int j) {
-					int sum = 0;
-					for (int a = i; a <= j; a++) {
-						sum += A[a];
-					}
-					return sum;
-				}
-				int Solution::solve(vector<int> &A, int B) {
-					int max = sum(A, 0, B - 1);
-					int temp = max, i = B - 1, j = A.size() - 1;
-					for (int k = 1; k <= B; k++) {
-						if (i == -1) {
-							i = A.size() - 1;
-						}
-						if (j == -1) {
-							j = A.size() - 1;
-						}
-						temp -= A[i--];
-						temp += A[j--];
-						if (temp > max) {
-							max = temp;
-						}
-					}
-					return max;
-				}
-			}
-			{
-				/*
-				Min Steps in Infinite Grid
-				https://www.interviewbit.com/problems/min-steps-in-infinite-grid/
-
-				#Good
-				*/
-				int Solution::coverPoints(vector<int> &A, vector<int> &B) {
-					int n1 = A.size(), n2 = B.size(), ans = 0;
-					for (int i = 1; i < n1; i++) {
-						int x = abs(A[i - 1] - A[i]);
-						int y = abs(B[i - 1] - B[i]);
-						ans += max(x, y);
-					}
-					return ans;
-				}
-			}
-			{
-				/*
-				Minimum Lights to Activate
-				https://www.interviewbit.com/problems/minimum-lights-to-activate/
-
-				#Good
-				*/
-				int Solution::solve(vector<int> &A, int B) {
-					int b = B - 1, count = 0;
-					int s = A.size();
-					int lastlight = -1, check = 0;
-					for (int i = b; i >= 0; i--) {
-						if (A[i] == 1) {
-							lastlight = i; //last light from B-1 to 0
-							count++;
-							break;
-						}
-					}
-					if (count == 0) {
-						return -1;
-					}
-					check = lastlight + B; //first lightoff
-					while (check < s) {
-						int flag = 0;
-						for (int i = min(check + b, s - 1); i >= check - b; i--) {
-							if (A[i] == 1) {
-								lastlight = i;
-								flag = 1;
-								check = i + B;
-								count++;
-								break;
-							}
-						}
-						if (flag == 0) {
-							return -1;
-						}
-					}
-					return count;
-				}
-			}
-			{
-				/*
-				Max Sum Contiguous Subarray
-				https://www.interviewbit.com/problems/max-sum-contiguous-subarray/
-
-				#Famous #Revise
-				*/
-				int Solution::maxSubArray(const vector<int> &A) {
-					int mx = *max_element(A.begin(), A.end());
-					if (mx <= 0)return mx;
-					int ans = 0, sum = 0;
-					for (int i = 0; i < A.size(); i++) {
-						sum += A[i];
-						if (sum <= 0) {
-							sum = 0;
-							continue;
-						}
-						ans = max(ans, sum);
-					}
-					return ans;
-				}
-			}
-			{
-				/*
-				Maximum Absolute Difference
-				https://www.interviewbit.com/problems/maximum-absolute-difference/
-
-				#Good #Tricky
-				*/
-				int Solution::maxArr(vector<int> &A) {
-					int n = A.size();
-					vector<int> P(n), N(n);
-					int ans = 0;
-					for (int i = 0; i < n; i++) {
-						P[i] = A[i] + i;
-						N[i] = A[i] - i;
-					}
-					return max(*max_element(P.begin(), P.end()) - *min_element(P.begin(), P.end()),
-					           *max_element(N.begin(), N.end()) - *min_element(N.begin(), N.end()));
-				}
-			}
-			{
-				/*
-				Partitions
-				https://www.interviewbit.com/problems/partitions/
-
-				#Good
-				*/
-				// Best
-				{
-					// Function to count the no of ways
-					int countways(int n, vector<int>& a)
-					{
-						int pre[n];
-						pre[0] = a[0];
-						for (int i = 1; i < n; i++) pre[i] = pre[i - 1] + a[i];
-						if (pre[n - 1] % 3) return 0;
-						int req = pre[n - 1] / 3;
-						int cnt = 0;
-						int ans = 0;
-						for (int i = 0; i < n - 1; i++)
-						{
-							if (pre[i] == 2 * req) ans += cnt;
-							cnt += (pre[i] == req);
-						}
-						return ans;
-					}
-					int Solution::solve(int A, vector<int> &B) {
-						assert(A >= 1 && A <= 100000 && A == B.size());
-						for (int a : B)assert(a >= -1000000000 && a <= 1000000000);
-						return countways(A, B);
-					}
-				}
-				// Good
-				{
-					int Solution::solve(int n, vector<int> &A) {
-						vector<int> sum(n, 0);
-						sum[0] = A[0];
-						for (int i = 1; i < n; i++) {
-							sum[i] = sum[i - 1] + A[i];
-						}
-						if (abs(sum[n - 1]) % 3 > 0)return 0;
-						int count = 0, S = sum[n - 1] / 3;
-						for (int i = 0; i < n - 1; i++) {
-							for (int j = i + 1; j < n - 1; j++) {
-								if (sum[i] == S && sum[j] == 2 * S)count++;
-							}
-						}
-						return count;
-					}
-				}
-			}
-			{
-				/*
-				Maximum Area of Triangle!
-				https://www.interviewbit.com/problems/maximum-area-of-triangle/
-				*/
-				int ans = 0;
-				int code(char c) {
-					if (c == 'r') {
-						return 0;
-					} else if (c == 'g') {
-						return 1;
-					} else {
-						return 2;
-					}
-				}
-				int area(float x, float y) {
-					return ceil((x * y) / 2);
-				}
-				int Solution::solve(vector<string> &A) {
-					ans = 0;
-					int m = A[0].size(), n = A.size();
-					vector<int> M(3, -1), // largest overall
-					       N(3, INT_MAX); //smallest overall
-					for (int i = 0; i < n; i++) {
-						for (int j = 0; j < m; j++) {
-							int c = code(A[i][j]);
-							M[c] = max(M[c], j);
-							N[c] = min(N[c], j);
-						}
-					}
-					for (int j = 0; j < m; j++) {
-						vector<int> B(3, -1), //largest in col
-						       S(3, INT_MAX); //smallest in col
+					#Famous #Good
+					*/
+					int Solution::removeDuplicates(vector<int> &A) {
+						int count = 0, n = A.size();
 						for (int i = 0; i < n; i++) {
-							int c = code(A[i][j]);
-							B[c] = max(B[c], i);
-							S[c] = min(S[c], i);
-						}
-						for (int c = 0; c < 3; c++) {
-							int a = (c + 1) % 3, b = (c + 2) % 3;
-							if (B[a] != -1 && B[b] != -1 && M[c] != -1) {
-								int x = max(abs(B[a] - S[b]), abs(B[b] - S[a])) + 1;
-								int y = max(abs(M[c] - j), abs(N[c] - j)) + 1;
-								if (y == 1)continue;
-								ans = max(ans, area(x, y));
-							}
-						}
-					}
-					return ans;
-				}
-			}
-			{
-				/*
-				Flip
-				https://www.interviewbit.com/problems/flip/
-
-				#Good #VeryGood
-				*/
-				vector<int> Solution::flip(string A) {
-					int n = A.length(), start = 1, end = -1;
-					int sum = 0, psum = 0;
-					vector<int> vec{1, -1};
-					for (int i = 0; i < A.size(); i++) {
-						if (A[i] == '0') {
-							sum++;
-							if (sum > psum) {
-								vec[0] = start;
-								vec[1] = i + 1;
-								psum = sum;
-							}
-						} else if (A[i] == '1') {
-							sum--;
-							if (sum < 0) {
-								sum = 0;
-								start = i + 2;
-							}
-						}
-					}
-
-					if (vec[1] == -1) {
-						vec.clear();
-					}
-					return vec;
-				}
-			}
-		}
-		// Value Range
-		{
-			{
-				/*
-				Merge Intervals
-				https://www.interviewbit.com/problems/merge-intervals/
-				*/
-				vector<Interval> Solution::insert(vector<Interval> &intervals, Interval newInterval) {
-					vector<Interval> res;
-					for (Interval test : intervals) {
-						if (newInterval.start > test.end) res.push_back(test);
-						else if (test.start > newInterval.end) {
-							res.push_back(newInterval);
-							newInterval = test;
-						} else if (newInterval.start <= test.end || newInterval.end >= test.start) {
-							newInterval = Interval(min(test.start, newInterval.start), max(test.end, newInterval.end));
-						}
-					}
-					res.push_back(newInterval);
-					return res;
-				}
-			}
-			{
-				/*
-				Merge Overlapping Intervals
-				https://www.interviewbit.com/problems/merge-overlapping-intervals/
-
-				#Good
-				*/
-				bool sortfun(Interval A, Interval B) {
-					return (A.start < B.start);
-				}
-				vector<Interval> Solution::merge(vector<Interval> &A) {
-					int n = A.size();
-					sort(A.begin(), A.end(), sortfun);
-					vector<Interval> ans;
-					Interval temp;
-					temp = Interval(A[0].start, A[0].end);
-					for (int i = 1; i < n; i++) {
-						if (A[i].start >= temp.start && A[i].start <= temp.end) {
-							temp = Interval(min(A[i].start, temp.start), max(A[i].end, temp.end));
-						} else {
-							ans.push_back(temp);
-							temp = Interval(A[i].start, A[i].end);
-						}
-					}
-					ans.push_back(temp);
-
-					return ans;
-				}
-			}
-			{
-				/*
-				Perfect Peak of Array
-				https://www.interviewbit.com/problems/perfect-peak-of-array/
-				*/
-				int Solution::perfectPeak(vector<int> &A) {
-					int size = A.size(), leftmax[size], rightmin[size];
-					leftmax[0] = A[0];
-					for (int i = 1; i < size; i++) {
-						leftmax[i] = max(A[i - 1], leftmax[i - 1]);
-					}
-					rightmin[size - 1] = A[size - 1];
-					for (int i = size - 2; i >= 0; i--) {
-						rightmin[i] = min(A[i + 1], rightmin[i + 1]);
-					}
-					for (int i = 1; i < size - 1; i++) {
-						if (A[i] > leftmax[i] && A[i] < rightmin[i]) {
-							return 1;
-						}
-					}
-					return 0;
-				}
-			}
-			{
-				/*
-				Spiral Order Matrix II
-				https://www.interviewbit.com/problems/spiral-order-matrix-ii/
-				*/
-				//Best Solution
-				{
-					vector<vector<int> > Solution::generateMatrix(int A) {
-						vector< vector<int> > arr(A, vector<int> (A, 0));
-						int start, end, i;
-						long long int x;
-						x = 1;
-						for (start = 0, end = A - 1; start <= end; start++, end--)
-						{
-							for (i = start; i <= end; i++) { arr[start][i] = x; x++;}
-							for (i = start + 1; i <= end; i++) { arr[i][end] = x; x++;}
-							for (i = end - 1; i >= start; i--) { arr[end][i] = x; x++;}
-							for (i = end - 1; i >= start + 1; i--) { arr[i][start] = x; x++;}
-						}
-						return arr;
-					}
-				}
-				// Good
-				{
-					vector<vector<int> > Solution::generateMatrix(int A) {
-						vector<vector<int>> B(A, vector<int>(A, 0));
-						int num = 1;
-						int lim[4] = {0, A - 1, A - 1, 0}; //top 0, right 1, bottom 2, left 3
-						int direction = 1;
-
-						while (lim[0] <= lim[2] && lim[3] <= lim[1]) {
-							if (direction == 1) {
-								for (int i = lim[3]; i <= lim[1]; i++) {
-									B[lim[0]][i] = num++;
-								}
-								lim[0]++;
-								direction = 2;
-							} else if (direction == 2) {
-								for (int i = lim[0]; i <= lim[2]; i++) {
-									B[i][lim[1]] = num++;
-								}
-								lim[1]--;
-								direction = 3;
-							} else if (direction == 3) {
-								for (int i = lim[1]; i >= lim[3]; i--) {
-									B[lim[2]][i] = num++;
-								}
-								lim[2]--;
-								direction = 4;
-							} else if (direction == 4) {
-								for (int i = lim[2]; i >= lim[0]; i--) {
-									B[i][lim[3]] = num++;
-								}
-								lim[3]++;
-								direction = 1;
-							}
-						}
-						return B;
-					}
-				}
-			}
-			{
-				/*
-				Pascal Triangle
-				https://www.interviewbit.com/problems/pascal-triangle/
-				*/
-				vector<vector<int> > Solution::solve(int A) {
-					vector<vector<int>> B;
-					if (A == 0) {
-						return B;
-					}
-					vector<int> C(1, 1);
-					B.push_back(C);
-					for (int i = 1; i < A; i++) {
-						vector<int> C(i + 1, 1);
-						for (int j = 1; j < i; j++) {
-							C[j] = B[i - 1][j] + B[i - 1][j - 1];
-						}
-						B.push_back(C);
-					}
-					return B;
-				}
-			}
-			{
-				/*
-				Anti Diagonals
-				https://www.interviewbit.com/problems/anti-diagonals/
-				*/
-				vector<vector<int> > Solution::diagonal(vector<vector<int> > &A) {
-					int n = A.size();
-					if (n == 0) {
-						return {} ;
-					}
-					vector<vector<int>> B(2 * n - 1);
-					for (int k = 0; k < n; k++) {
-						vector<int> C(k + 1);
-						int i = 0, j = k;
-						while (i <= k) {
-							C[i] = A[i][j--];
-							i++;
-						}
-						B[k] = C;
-					}
-					for (int k = 0; k < n - 1; k++) {
-						vector<int> C(n - 1 - k);
-						int i = 1 + k, j = n - 1;
-						while (i < n) {
-							C[i - 1 - k] = A[i][j--];
-							i++;
-						}
-						B[k + n] = C;
-					}
-					return B;
-				}
-			}
-			{
-				/*
-				Triplets with Sum between given range
-				https://www.interviewbit.com/problems/triplets-with-sum-between-given-range/
-
-				#Good
-				*/
-				int Solution::solve(vector<string> &A) {
-					int n = A.size();
-					vector<double> v(n, 0);
-					for (int i = 0; i < n; i++) v[i] = stod(A[i]);
-
-					if (n < 3) return 0;
-
-					double minm, maxm;
-					bool lower_limit, uper_limit;
-					maxm = (v[0] > v[1]) ? v[0] : v[1];
-					minm = (v[0] < v[1]) ? v[0] : v[1];
-					double currsum;
-					for (int i = 2; i < n; i++) {
-						currsum = maxm + minm + v[i];
-						lower_limit = currsum > 1;
-						uper_limit = currsum < 2;
-
-						if (lower_limit && uper_limit) return 1;
-						else if (!uper_limit) {
-							maxm = min(maxm, v[i]);
-							if (minm > maxm) swap<double>(minm, maxm);
-						}
-						else if (!lower_limit) {
-							minm = max(minm, v[i]);
-							if (minm > maxm) swap<double>(minm, maxm);
-						}
-
-					}
-					return 0;
-				}
-			}
-			{
-				/*
-				Balance Array
-				https://www.interviewbit.com/problems/balance-array/
-				*/
-				int Solution::solve(vector<int> &A) {
-					int size = A.size(), count = 0;
-					int lefteven = 0, leftodd = 0;
-					int righteven = 0, rightodd = 0;
-					for (int i = 0; i < size; i += 2) {
-						righteven += A[i];
-					}
-					for (int i = 1; i < size; i += 2) {
-						rightodd += A[i];
-					}
-
-					for (int i = 0; i < size; i++) {
-						//cout<<lefteven<<" "<<rightodd<<" "<<leftodd<<" "<<righteven<<" ";
-						if (i % 2 == 0) {
-							if ((lefteven + rightodd) == (leftodd + righteven - A[i])) {
+							if (i < n - 2 && A[i] == A[i + 1] && A[i] == A[i + 2]) continue;
+							else {
+								A[count] = A[i];
 								count++;
 							}
-							lefteven += A[i];
-							righteven -= A[i];
 						}
-						if (i % 2 == 1) {
-							if ((lefteven + rightodd - A[i]) == (leftodd + righteven)) {
-								count++;
-							}
-							leftodd += A[i];
-							rightodd -= A[i];
-						}
-					}
-					return count;
-				}
-			}
-			{
-				/*
-				Find Duplicate in Array
-				https://www.interviewbit.com/problems/find-duplicate-in-array/
-				*/
-				int Solution::repeatedNumber(const vector<int> &A) {
-					vector<int> B(A.size(), 0);
-					for (int i = 0; i < A.size(); i++) {
-						B[A[i]] += 1;
-					}
-					for (int i = 0; i < A.size(); i++) {
-						if (B[i] >= 2) {
-							return i;
-						}
-					}
-					return -1;
-				}
-			}
-			{
-				/*
-				Maximum Consecutive Gap
-				https://www.interviewbit.com/problems/maximum-consecutive-gap/
-
-				#Good #Revise #Bucketing
-				*/
-				int Solution::maximumGap(const vector<int> &A) {
-					if (A.size() < 2) return 0;
-					int mn = *min_element(A.begin(), A.end()), mx = *max_element(A.begin(), A.end()), n = A.size();
-					double gap = (double)(mx - mn) / (n - 1);
-					if (gap == 0)return 0;
-					vector<int>mx_buc(n, INT_MIN), mn_buc(n, INT_MAX);
-					for (int x : A) {
-						int ind = floor((x - mn) / gap);
-						if (mn == x)continue;
-						mx_buc[ind] = max(mx_buc[ind], x);
-						mn_buc[ind] = min(mn_buc[ind], x);
-					}
-					int mx_gp = INT_MIN, prev_mx = mn;
-					for (int i = 0; i < n; i++) {
-						if (mn_buc[i] == INT_MAX)continue;
-						int cur = mn_buc[i] - prev_mx;
-						mx_gp = max(mx_gp, cur);
-						prev_mx = mx_buc[i];
-					}
-					return mx_gp;
-				}
-			}
-		}
-		// Arrangement
-		{
-			{
-				/*
-				Sort array with squares!
-				https://www.interviewbit.com/problems/sort-array-with-squares/
-				*/
-				vector<int> Solution::solve(vector<int> &A) {
-					int s = A.size(), start = 0, end = s - 1;
-					int sq1, sq2;
-					vector<int> B;
-					sq1 = A[start] * A[start];
-					sq2 = A[end] * A[end];
-					while (start != end) {
-						if (sq1 >= sq2) {
-							B.push_back(sq1);
-							start++;
-							sq1 = A[start] * A[start];
-						} else {
-							B.push_back(sq2);
-							end--;
-							sq2 = A[end] * A[end];
-						}
-					}
-					B.push_back(A[start]*A[start]);
-					reverse(B.begin(), B.end());
-					return B;
-				}
-			}
-			{
-				/*
-				Largest Number
-				https://www.interviewbit.com/problems/largest-number/
-
-				#Good
-				*/
-				int myCompare(string X, string Y) {
-					string XY = X.append(Y);
-					string YX = Y.append(X);
-					return XY.compare(YX) > 0 ? 1 : 0;
-				}
-
-				string Solution::largestNumber(const vector<int> &A) {
-					vector<string> b;
-					for (int i = 0; i < A.size(); i++) {
-						b.push_back(to_string(A[i]));
-					}
-					sort(b.begin(), b.end(), myCompare);
-					string ans = "";
-					for (int i = 0; i < b.size(); i++) {
-						ans += b[i];
-					}
-					int i = 0;
-					while (ans[i] == '0') {
-						i++;
-					}
-					if (i == ans.length())
-						ans = "0";
-					return ans;
-				}
-			}
-			{
-				/*
-				Rotate Matrix
-				https://www.interviewbit.com/problems/rotate-matrix/
-				*/
-				void Solution::rotate(vector<vector<int> > &A) {
-					int n = A.size();
-					for (int i = 0; i < n; i++) {
-						for (int j = i; j < n - i - 1; j++) {
-							swap(A[i][j], A[j][n - i - 1]);
-							swap(A[i][j], A[n - i - 1][n - j - 1]);
-							swap(A[i][j], A[n - j - 1][i]);
-						}
+						return count;
 					}
 				}
-			}
-			{
-				/*
-				Find Permutation
-				https://www.interviewbit.com/problems/find-permutation/
-				*/
-				vector<int> Solution::findPerm(const string A, int B) {
-					int big = B, small = 1, i = 0;
-					vector<int> ans(B);
-					while (i < B) {
-						if (A[i] == 'D') {
-							ans[i++] = big--;
-						} else {
-							ans[i++] = small++;
-						}
-					}
-					return ans;
-				}
-			}
-			{
-				/*
-				Next Permutation
-				https://www.interviewbit.com/problems/next-permutation/
-
-				#Good
-				*/
-				vector<int> Solution::nextPermutation(vector<int> &num) {
-					int len = num.size();
-					int i, j;
-					for (i = len - 2; i >= 0 ; i--)
-						if (num[i] < num[i + 1]) break;
-
-					if (i == -1) {
-						reverse(num.begin(), num.end());
-						return num;
-					}
-
-					for (j = len - 1; j > i; j--)
-						if (num[j] > num[i]) break;
-
-					swap(num[i], num[j]);
-					reverse(num.begin() + i + 1, num.end());
-					return num;
-				}
-			}
-		}
-		// Sorting
-		{
-			{
-				/*
-				Noble Integer
-				https://www.interviewbit.com/problems/noble-integer/
-				*/
-				int Solution::solve(vector<int> &A) {
-					int n = A.size();
-					sort(A.begin(), A.end(), greater<int>());
-					if (A[0] == 0) return 1;
-					for (int i = 1; i < n; i++) {
-						if (A[i] == i && A[i] != A[i - 1]) return 1;
-					}
-					return -1;
-				}
-			}
-			{
-				/*
-				Wave Array
-				https://www.interviewbit.com/problems/wave-array/
-				*/
-				vector<int> Solution::wave(vector<int> &A) {
-					sort(A.begin(), A.end());
-					int i = 0;
-					for (i = 0; i < A.size() - 2; i += 2) {
-						swap(A[i], A[i + 1]);
-					}
-					if (i == A.size() - 2) {
-						swap(A[A.size() - 1], A[A.size() - 2]);
-					}
-					return A;
-				}
-			}
-			{
-				/*
-				Hotel Bookings Possible
-				https://www.interviewbit.com/problems/hotel-bookings-possible/
-
-				#Good
-				*/
-				bool Solution::hotel(vector<int> &arrival, vector<int> &departure, int K) {
-					int n = arrival.size();
-					vector<pair<int, int> > ans;
-					for (int i = 0; i < n; i++) {
-						ans.push_back(make_pair(arrival[i], 1));
-						ans.push_back(make_pair(departure[i], 0));
-					}
-
-					sort(ans.begin(), ans.end());
-
-					int curr_active = 0, max_active = 0;
-
-					for (int i = 0; i < ans.size(); i++) {
-						if (ans[i].second == 1) {
-							curr_active++;
-							max_active = max(max_active, curr_active);
-						}
-						else
-							curr_active--;
-					}
-
-					return (K >= max_active);
-				}
-			}
-			{
-				/*
-				Max Distance
-				https://www.interviewbit.com/problems/max-distance/
-				*/
-				int Solution::maximumGap(const vector<int> &A) {
-					int s = A.size();
-					vector<pair<int, int>> B;
-					for (int i = 0; i < s; i++) {
-						B.push_back(make_pair(A[i], i));
-					}
-					sort(B.begin(), B.end());
-					int maxIndex = B[s - 1].second;
-					int ans = 0;
-					for (int i = s - 2; i >= 0; i--) {
-						ans = max(ans, maxIndex - B[i].second);
-						maxIndex = max(maxIndex, B[i].second);
-					}
-					return ans;
-				}
-			}
-			{
-				/*
-				Maximum Unsorted Subarray
-				https://www.interviewbit.com/problems/maximum-unsorted-subarray/
-				*/
-				vector<int> Solution::subUnsort(vector<int> &A) {
-					int n = A.size();
-					vector<int> ans(1, -1);
-					if (n <= 1) {
-						return ans;
-					}
-					int max = A[0];
-					int i;
-					for (i = 1; i < n; i++) {
-						if (A[i] < A[i - 1]) {
-							ans[0] = i - 1;
-							break;
-						}
-					}
-					if (i == n)   return ans;
-					ans.push_back(n - 1);
-					for (i = n - 2; i >= ans[0]; i--) {
-						if (A[i] > A[i + 1]) {
-							ans[1] = i + 1;
-							break;
-						}
-					}
-					int mini = *min_element(A.begin() + ans[0], A.begin() + ans[1] + 1);
-					int maxi = *max_element(A.begin() + ans[0], A.begin() + ans[1] + 1);
-					for (i = 0; i < ans[0]; i++) {
-						if (A[i] > mini) {
-							ans[0] = i;
-						}
-					}
-					for (i = n - 1; i > ans[1]; i--) {
-						if (A[i] < maxi) {
-							ans[1] = i;
-						}
-					}
-					return ans;
-				}
-			}
-		}
-		// Space Recycle
-		{
-			{
-				/*
-				Set Matrix Zeros
-				https://www.interviewbit.com/problems/set-matrix-zeros/
-
-				#Famous
-				*/
-				void Solution::setZeroes(vector<vector<int> > &A) {
-					int n = A.size();
-					int m = A[0].size();
-
-					vector<bool> row(n, false), col(m, false);
-					for (int i = 0; i < n; i++) {
-						for (int j = 0; j < m; j++) {
-							if (A[i][j] == 0) {
-								row[i] = true;
-								col[j] = true;
-							}
-						}
-					}
-
-					for (int i = 0; i < n; i++) {
-						for (int j = 0; j < m; j++) {
-							if (row[i] || col[j]) {
-								A[i][j] = 0;
-							}
-						}
-					}
-				}
-			}
-			{
-				/*
-				Maximum Sum Square SubMatrix
-				https://www.interviewbit.com/problems/maximum-sum-square-submatrix/
-				*/
-			}
-		}
-		// Missing / Repeated number
-		{
-			{
-				/*
-				First Missing Integer
-				https://www.interviewbit.com/problems/first-missing-integer/
-
-				#Good #Famous #Revise
-				*/
-				int Solution::firstMissingPositive(vector<int> &A) {
-					int n = A.size();
-					for (int i = 0; i < n; i++) {
-						if (A[i] > 0 && A[i] <= n) {
-							int pos = A[i] - 1;
-							if (A[pos] != A[i]) {
-								swap(A[pos], A[i]);
-								i--;
-							}
-						}
-					}
-					for (int i = 0; i < n; i++) {
-						if (A[i] != i + 1) return (i + 1);
-					}
-					return n + 1;
-				}
-			}
-			{
-				/*
-				Repeat and Missing Number Array
-				https://www.interviewbit.com/problems/repeat-and-missing-number-array/
-
-				#Tricky #Revise
-				*/
-				//#define ll long long
-				vector<int> Solution::repeatedNumber(const vector<int> &A) {
-					ll n = A.size();
-
-					ll diff = 0;
-					for (ll i = 0; i < n; i++)  diff += (ll)(A[i] - (i + 1)); // a-b
-
-					ll sqDiff = 0;
-					for (ll i = 0; i < n; i++)  sqDiff += (ll)((ll)A[i] * (ll)A[i] - (i + 1) * (i + 1)); //I was forgetting to typecast here, so It gave alot of error :(
-
-					ll sum = sqDiff / diff; // a+b
-
-					int a = (sum + diff) / 2;
-					int b = (sum - a);
-
-					vector<int> v{a, b};
-					return v;
-				}
-			}
-			{
-				/*
-				N/3 Repeat Number
-				https://www.interviewbit.com/problems/n3-repeat-number/
-
-				#Tricky #Famous
-				*/
-				int count(int x, const vector<int> &A) {
-					int n = A.size(), cont = 0;
-					for (int i = 0; i < n; i++) {
-						if (A[i] == x)cont++;
-					}
-					return cont;
-				}
-				int Solution::repeatedNumber(const vector<int> &A) {
-					int n = A.size(), lim = n / 3 + 1;
-					vector<pair<int, int>> M;
-					for (int i = 0; i < n; i++) {
-						if (M.empty()) {
-							M.push_back({A[i], 1});
-						} else if (A[i] == M[0].first) {
-							M[0].second++;
-						} else if (M.size() == 1) {
-							M.push_back({A[i], 1});
-						} else if (A[i] == M[1].first) {
-							M[1].second++;
-						} else {
-							M[0].second--;
-							M[1].second--;
-							if (M[0].second == 0 && M[1].second == 0) {
-								M.clear();
-							} else if (M[0].second == 0) {
-								M.erase(M.begin());
-							} else if (M[1].second == 0) {
-								M.erase(M.begin() + 1);
-							}
-						}
-					}
-					for (auto x : M) {
-						if (count(x.first, A) >= lim)return x.first;
-					}
-					return -1;
-				}
-			}
-		}
-	}
-// Strings
-	{
-		// String Simulation
-		{
-			{
-				/*
-				Palindrome String
-				https://www.interviewbit.com/problems/palindrome-string/
-
-				#Famous
-				*/
-				int Solution::isPalindrome(string s) {
-					int i = 0, j = (int)s.size() - 1;
-					while (i < j) {
-						while (i < j && !isalnum(s[i])) i++;
-						while (i < j && !isalnum(s[j])) j--;
-						if (toupper(s[i]) != toupper(s[j])) return false;
-						i++;
-						j--;
-					}
-					return true;
-				}
-			}
-			{
-				/*
-				Vowel and Consonant Substrings!
-				https://www.interviewbit.com/problems/vowel-and-consonant-substrings/
-				*/
-				bool vowel(char c) {
-					if (c == 'a' || c == 'e' || c == 'i' || c == 'o' || c == 'u')return 1;
-					return 0;
-				}
-				int Solution::solve(string A) {
-					int n = A.length(), vcount = 0, ccount = 0, ans = 0;
-					for (int i = 0; i < n; i++) {
-						if (vowel(A[i])) {
-							vcount++;
-							ans += ccount;
-						} else {
-							ccount++;
-							ans += vcount;
-						}
-						ans %= 1000000007;
-					}
-					return ans;
-				}
-			}
-			{
-				/*
-				Remove Consecutive Characters
-				https://www.interviewbit.com/problems/remove-consecutive-characters/
-				*/
-				string Solution::solve(string A, int B) {
-					char temp = A[0];
-					int count = 0;
-					string ans = "";
-					for (int i = 0; i < A.length(); i++) {
-						if (temp != A[i]) {
-							if (count != B) ans += string(count, temp);
-							count = 1;
-							temp = A[i];
-						} else {
-							count++;
-						}
-					}
-					if (count != B) ans += string(count, temp);
-					return ans;
-				}
-			}
-			{
-				/*
-				Longest Common Prefix
-				https://www.interviewbit.com/problems/longest-common-prefix/
-
-				#Good
-				*/
-				// Best
 				{
-					Can use Binary search on minimum size string
-				}
-				// Good
-				{
-					string Solution::longestCommonPrefix(vector<string> &A) {
-						string ans = "";
-						int n = A.size(), m = INT_MAX;
-						for (string s : A) m = min(m, (int) s.size());
-						for (int j = 0; j < m; j++) {
-							for (int i = 1; i < n; i++) {
-								if (A[i][j] != A[0][j]) return ans;
+					/*
+					Sort by Color
+					https://www.interviewbit.com/problems/sort-by-color/
+
+					#Good #Revise
+					*/
+					void Solution::sortColors(vector<int> &A) {
+						int i = -1, k = A.size();
+						for (int j = 0; j < A.size() && j < k; j++) {
+							if (A[j] < 1) {
+								i++;
+								swap(A[i], A[j]);
 							}
-							ans += A[0][j];
+							else if (A[j] > 1) {
+								k--;
+								swap(A[k], A[j]);
+								j--;
+							}
+						}
+					}
+				}
+			}
+		}
+// Binary Search
+		/*
+		https://leetcode.com/discuss/study-guide/786126/Python-Powerful-Ultimate-Binary-Search-Template.-Solved-many-problems
+		*/
+		{
+			//Simple Binary Search
+			{
+				{
+					/*
+					Search in Bitonic Array!
+					https://www.interviewbit.com/problems/search-in-bitonic-array/
+					*/
+					int Solution::solve(vector<int> &A, int B) {
+						int start = 1, n = A.size(), end = n - 1, mid;
+						while (start <= end) {
+							mid = start + (end - start) / 2;
+							if (A[mid] > A[mid - 1] && A[mid] < A[mid + 1]) {
+								start = mid + 1;
+							} else if (A[mid] < A[mid - 1] && A[mid] > A[mid + 1]) {
+								end = mid - 1;
+							} else {
+								break;
+							}
+						}
+						int bitonic = mid;
+						start = 0, end = bitonic;
+						while (start <= end) {
+							mid = start + (end - start) / 2;
+							if (A[mid] < B) {
+								start = mid + 1;
+							} else if (A[mid] > B) {
+								end = mid - 1;
+							} else {
+								return mid;
+							}
+						}
+						start = bitonic + 1, end = n - 1;
+						while (start <= end) {
+							mid = start + (end - start) / 2;
+							if (A[mid] > B) {
+								start = mid + 1;
+							} else if (A[mid] < B) {
+								end = mid - 1;
+							} else {
+								return mid;
+							}
+						}
+						return -1;
+					}
+				}
+				{
+					/*
+					Smaller or equal elements
+					https://www.interviewbit.com/problems/smaller-or-equal-elements/
+					*/
+					int Solution::solve(vector<int> &A, int B) {
+						int l = 0, r = A.size() - 1, count = 0;
+						while (l <= r) {
+							int mid = l + (r - l) / 2;
+							if (A[mid] <= B) {
+								count = mid + 1;
+								l = mid + 1;
+							} else {
+								r = mid - 1;
+							}
+						}
+						return count;
+					}
+				}
+				{
+					/*
+					WoodCutting Made Easy!
+					https://www.interviewbit.com/problems/woodcutting-made-easy/
+
+					#Good
+					*/
+					bool check(vector < int > & A, int val, int B) {
+						int rem = 0;
+						int n = A.size();
+						for (int i = 0; i < n; i++) {
+							if (A[i] > val) rem += A[i] - val;
+						}
+						if (rem >= B) return true;
+						return false;
+					}
+					int Solution::solve(vector < int > & A, int B) {
+						int low = 0;
+						int high = 1000000;
+						int ans = 0;
+						while (low <= high) {
+							int mid = (low + high) / 2;
+							if (check(A, mid, B)) {
+								ans = mid;
+								low = mid + 1;
+							} else high = mid - 1;
 						}
 						return ans;
 					}
 				}
-			}
-			{
-				/*
-				Count And Say
-				https://www.interviewbit.com/problems/count-and-say/
-				*/
-				string Solution::countAndSay(int A) {
-					string ans = "1";
-					while (A-- > 1) {
-						int n = ans.size(), count = 1;
-						string temp = "";
-						for (int i = 1; i < n; i++) {
-							if (ans[i] != ans[i - 1]) {
-								temp += to_string(count) + ans[i - 1];
-								count = 1;
-							} else {
-								count++;
-							}
-						}
-						temp += to_string(count) + ans.back();
-						ans = temp;
-					}
-					return ans;
-				}
-			}
-		}
-		// String Search
-		{
-			{
-				/*
-				Amazing Subarrays
-				https://www.interviewbit.com/problems/amazing-subarrays/
-				*/
-				bool check(char c) {
-					c = toupper(c);
-					if (c == 'A' || c == 'E' || c == 'I' || c == 'O' || c == 'U')return 1;
-					return 0;
-				}
-				int Solution::solve(string A) {
-					int n = A.length(), count = 0;
-					for (int i = 0; i < n; i++) {
-						if (check(A[i])) {
-							count += (n - i) % 10003;
-						}
-					}
-					return count % 10003;
-				}
-			}
-			{
-				/*
-				Implement StrStr
-				https://www.interviewbit.com/problems/implement-strstr/
-
-				#KMP
-				*/
-			}
-			{
-				/*
-				Stringoholics
-				https://www.interviewbit.com/problems/stringoholics/
-
-				#GCD*/
-			}
-		}
-		// String Tricks
-		{
-			{
-				/*
-				Minimum Characters required to make a String Palindromic
-				https://www.interviewbit.com/problems/minimum-characters-required-to-make-a-string-palindromic/
-				*/
-				int Solution::solve(string A) {
-					int n = A.length();
-					int l = 0, r = n - 1;
-					while (l < r) {
-						if (A[l] != A[r]) {
-							if (l == 0) {
-								r--;
-							} else {
-								l = 0;
-							}
-						} else {
-							l++;
-							r--;
-						}
-					}
-					if (l == r) {
-						return n - 2 * l - 1;
-					} else {
-						return n - 2 * l;
-					}
-				}
-			}
-			{
-				/*
-				Longest Palindromic Substring
-				https://www.interviewbit.com/problems/longest-palindromic-substring/
-
-				#Famous #Revise
-				*/
-				string expandAroundCenter(string s, int c1, int c2) {
-					int l = c1, r = c2;
-					int n = s.length();
-					while (l >= 0 && r <= n - 1 && s[l] == s[r]) {
-						l--;
-						r++;
-					}
-					return s.substr(l + 1, r - l - 1);
-				}
-				string Solution::longestPalindrome(string s) {
-					int n = s.length();
-					if (n == 0) return "";
-					string longest = s.substr(0, 1);  // a single char itself is a palindrome
-					for (int i = 0; i < n - 1; i++) {
-						string p1 = expandAroundCenter(s, i, i);
-						if (p1.length() > longest.length())
-							longest = p1;
-
-						string p2 = expandAroundCenter(s, i, i + 1);
-						if (p2.length() > longest.length())
-							longest = p2;
-					}
-					return longest;
-				}
-			}
-			{
-				/*
-				Minimum Parantheses!
-				https://www.interviewbit.com/problems/minimum-parantheses/
-				*/
-				int Solution::solve(string A) {
-					int start = 0, i = 0, count = 0;
-					while (A[i] != '\0') {
-						if (A[i] == '(') {
-							start++;
-						} else if (A[i] == ')') {
-							if (start > 0) {
-								start--;
-							} else {
-								count++;
-							}
-						}
-						i++;
-					}
-					return start + count;
-				}
-			}
-			{
-				/*
-				Minimum Appends for Palindrome!
-				https://www.interviewbit.com/problems/minimum-appends-for-palindrome/
-
-				#Good
-				*/
-				int Solution::solve(string A) {
-					string B = A;
-					reverse(B.begin(), B.end());
-					B = B + '#' + A;
-					int n = B.length(), i = 1, len = 0;
-					vector<int> LPS(n, 0);
-					while (i < n) {
-						if (B[len] == B[i]) {
-							len++;
-							LPS[i] = len > (i + 1) / 2 ? (i + 1) / 2 : len;
-						} else {
-							if (len == 0) {
-								LPS[i] = 0;
-							} else {
-								len = LPS[len - 1];
-								i--;
-							}
-						}
-						i++;
-					}
-					return A.length() - LPS.back();
-				}
-			}
-			{
-				/*
-				Convert to Palindrome
-				https://www.interviewbit.com/problems/convert-to-palindrome/
-				*/
-				int Solution::solve(string A) {
-					int left = 0;
-					int right = A.size() - 1;
-					int count = 0;
-					while (left < right)
+				{
+					/*
+					Matrix Search
+					https://www.interviewbit.com/problems/matrix-search/
+					*/
+					// Better
 					{
-						if (A[left] == A[right]) {left++; right--;}
-						else if (A[left + 1] == A[right]) {count++; left++;}
-						else if (A[left] == A[right - 1]) {count++; right--;}
-						else return 0;
-					}
-					if (count == 0 and left == right) return 1;
-					if (count == 1) return 1;
-					return 0;
-				}
-			}
-		}
-		// String Math
-		{
-			{
-				/*
-				Integer To Roman
-				https://www.interviewbit.com/problems/integer-to-roman/
-
-				#Famous
-				*/
-				vector<char> R = {'I', 'V', 'X', 'L', 'C', 'D', 'M'};
-				string roman(int x, int p) {
-					if (x == 0)return "";
-					if (x <= 3)return string(x, R[2 * p]);
-					else if (x <= 5)return string(5 - x, R[2 * p]) + R[2 * p + 1];
-					else if (x <= 8)return R[2 * p + 1] + string(x - 5, R[2 * p]);
-					string S = "";
-					return S + R[2 * p] + R[2 * p + 2];
-				}
-				string Solution::intToRoman(int A) {
-					int num[4];
-					string S = "";
-					for (int i = 3; i >= 0; i--) {
-						S += roman((A % (int)pow(10, i + 1)) / pow(10, i), i);
-					}
-					return S;
-				}
-			}
-			{
-				/*
-				Roman To Integer
-				https://www.interviewbit.com/problems/roman-to-integer/
-
-				#Famous
-				*/
-				int romanCharToInt(char c) {
-					switch (c) {
-					case 'I':   return 1;
-					case 'V':   return 5;
-					case 'X':   return 10;
-					case 'L':   return 50;
-					case 'C':   return 100;
-					case 'D':   return 500;
-					case 'M':   return 1000;
-					default:    return 0;
-					}
-				}
-				int Solution::romanToInt(string s) {
-					int num = 0;
-					int size = s.size();
-
-					for (int i = 0; i < size; i++) {
-						if (i < (size - 1) && romanCharToInt(s[i]) < romanCharToInt(s[i + 1])) {
-							num -= romanCharToInt(s[i]);
-						} else {
-							num += romanCharToInt(s[i]);
-						}
-					}
-					return num;
-				}
-			}
-			{
-				/*
-				Add Binary Strings
-				https://www.interviewbit.com/problems/add-binary-strings/
-				*/
-				string Solution::addBinary(string A, string B) {
-					if (A.length() < B.length()) {
-						swap(A, B);
-					}
-					int n = A.length(), m = B.length();
-					B = string(n - m, '0') + B;
-					int carry = 0, temp = 0;
-					for (int i = n - 1; i >= 0; i--) {
-						temp = A[i] - '0' + B[i] - '0' + carry;
-						if (temp == 3) {
-							carry = 1;
-						} else if (temp == 2) {
-							A[i] = '0';
-							carry = 1;
-						} else {
-							A[i] = '0' + temp;
-							carry = 0;
-						}
-					}
-					if (carry == 1) {
-						A = '1' + A;
-					}
-					return A;
-				}
-			}
-			{
-				/*
-				Power of 2
-				https://www.interviewbit.com/problems/power-of-2/
-				*/
-				string half(string A) {
-					string B = A;
-					int carry = 0;
-					for (int i = 0; i < A.length(); i++) {
-						B[i] = '0' + (A[i] - '0' + carry) / 2;
-						carry = ((A[i] - '0' + carry) % 2) * 10;
-					}
-					if (B[0] == '0') {
-						return B.substr(1, B.length() - 1);
-					}
-					return B;
-				}
-				int Solution::power(string A) {
-					int n = A.size();
-					int temp = A[A.length() - 1] - '0';
-					while (temp % 2 == 0) {
-						A = half(A);
-						if (A == "1") {
-							return 1;
-						}
-						temp = A[A.length() - 1] - '0';
-					}
-					return 0;
-				}
-			}
-			{
-				/*
-				Multiply Strings
-				https://www.interviewbit.com/problems/multiply-strings/
-				*/
-				string Solution::multiply(string A, string B) {
-					int m = A.size(), n = B.size();
-					string ans(m + n, '0');
-
-					for (int i = m - 1; i >= 0; --i) {
-						for (int j = n - 1; j >= 0; --j) {
-							int sum = (A[i] - '0') * (B[j] - '0') + (ans[i + j + 1] - '0');
-							ans[i + j + 1] = (sum % 10) + '0';
-							ans[i + j] += (sum / 10);
-						}
-					}
-
-					for (int i = 0; i < m + n; ++i) {
-						if (ans[i] != '0')
-							return ans.substr(i);
-					}
-					return "0";
-				}
-			}
-		}
-		// String Parsing
-		{
-			{
-				/*
-				Compare Version Numbers
-				https://www.interviewbit.com/problems/compare-version-numbers/
-
-				#Good
-				*/
-				int Solution::compareVersion(string A, string B) {
-					int j, i;
-					for ( i = 0, j = 0 ; i < A.size() || j < B.size() ; i++, j++) {
-						unsigned long long num1 = 0, num2 = 0;
-						while (i < A.size() && A[i] != '.') {
-							num1 *= 10;
-							num1 += A[i] - '0';
-							i++;
-						}
-						while (j < B.size() && B[j] != '.') {
-							num2 *= 10;
-							num2 += B[j] - '0';
-							j++;
-						}
-						if (num1 > num2) return 1;
-						if (num1 < num2) return -1;
-					}
-					return 0;
-				}
-			}
-			{
-				/*
-				Atoi
-				https://www.interviewbit.com/problems/atoi/
-
-				#Revise
-				*/
-				int Solution::atoi(const string & str) {
-					if (str == "") return 0;
-					stringstream ss(str);
-					int ret;
-					ss >> ret;
-					return ret;
-				}
-			}
-		}
-	}
-// Math
-	{
-		// Adhoc
-		{
-			{
-				/*
-				Verify Prime
-				https://www.interviewbit.com/problems/verify-prime/
-				*/
-				int Solution::isPrime(int A) {
-					if (A <= 1) {
-						return 0;
-					}
-					int s = (int) sqrt(A);
-					for (int i = 2; i <= s; i++) {
-						if (A % i == 0) {
+						int Solution::searchMatrix(vector<vector<int> > &A, int B) {
+							int r1 = 0, r2 = A.size() - 1, mid, n = A[0].size();
+							while (r1 <= r2) {
+								mid = r1 + (r2 - r1) / 2;
+								if (A[mid][0] > B) {
+									r2 = mid - 1;
+								} else if (A[mid][n - 1] < B) {
+									r1 = mid + 1;
+								} else {
+									break;
+								}
+							}
+							vector<int> &D = A[mid];
+							int c1 = 0, c2 = n - 1;
+							while (c1 <= c2) {
+								mid = c1 + (c2 - c1) / 2;
+								if (D[mid] == B) {
+									return 1;
+								} else if (D[mid] > B) {
+									c2 = mid - 1;
+								} else if (D[mid] < B) {
+									c1 = mid + 1;
+								}
+							}
 							return 0;
 						}
 					}
-					return 1;
-				}
-			}
-			{
-				/*
-				Sum of pairwise Hamming Distance
-				https://www.interviewbit.com/problems/sum-of-pairwise-hamming-distance/
-
-				#Good
-				*/
-				long long mod = 1000000007;
-				int Solution::hammingDistance(const vector<int> &A) {
-					long long ans = 0, x = 1, n = A.size();
-					while (x > 0) {
-						long long count = 0;
-						for (int i = 0; i < n; i++) {
-							if ((A[i]&x) > 0)count++;
+					// Good
+					{
+						int Solution::searchMatrix(vector<vector<int> > &A, int B) {
+							int N = A.size();
+							int M = A[0].size();
+							int start = 0, end = N * M - 1;
+							while (start <= end) {
+								int mid = start + (end - start) / 2;
+								int x = mid / M;
+								int y = mid % M;
+								if (A[x][y] == B) return 1;
+								if (B < A[x][y]) end = mid - 1;
+								else start = mid + 1;
+							}
+							return 0;
 						}
-						ans += 2LL * (count * (n - count));
-						ans %= mod;
-						x <<= 1;
 					}
-					return ans;
+				}
+				{
+					/*
+					Search for a Range
+					https://www.interviewbit.com/problems/search-for-a-range/
+
+					#Revise
+					*/
+					int search(const vector<int> &A, int B, bool first) {
+						int low = 0, high = A.size() - 1, ans = -1;
+						while (low <= high) {
+							int mid = (low + high) / 2;
+							if (A[mid] == B) { ans = mid; if (first) high = mid - 1; else low = mid + 1; }
+							else if (A[mid] < B) low = mid + 1;
+							else high = mid - 1;
+						}
+						return ans;
+					}
+					vector<int> Solution::searchRange(const vector<int> &A, int B) {
+						vector<int> result(2);
+						result[0] = search(A, B, true);
+						result[1] = search(A, B, false);
+						return result;
+					}
+				}
+				{
+					/*
+					Sorted Insert Position
+					https://www.interviewbit.com/problems/sorted-insert-position/
+
+					#LowerBound
+					*/
+					int Solution::searchInsert(vector<int> &A, int B) {
+						int l = 0, r = A.size() - 1, ans = A.size();
+						while (l <= r) {
+							int mid = l + (r - l) / 2;
+							if (A[mid] < B) {
+								l = mid + 1;
+							} else {
+								ans = mid;
+								r = mid - 1;
+							}
+						}
+						return ans;
+					}
 				}
 			}
+			// Search Answer
 			{
+				{
+					/*
+					Square Root of Integer
+					https://www.interviewbit.com/problems/square-root-of-integer/
+					*/
+					int Solution::sqrt(int A) {
+						if (A == 0 || A == 1) {
+							return A;
+						}
+						int start = 1, end = A / 2;
+						while (start <= end) {
+							int mid = start + (end - start) / 2;
+							if (mid > A / mid) {
+								end = mid - 1;
+							} else {
+								start = mid + 1;
+							}
+						}
+						return end;
+					}
+				}
+				{
+					/*
+					Allocate Books
+					https://www.interviewbit.com/problems/allocate-books/
 
+					#Good #Revise
+					*/
+					int check(vector<int> &A, int page) {
+						int count = 1, n = A.size(), temp = 0;
+						for (int i = 0; i < n; i++) {
+							temp += A[i];
+							if (temp > page) {
+								temp = A[i];
+								count++;
+							}
+						}
+						return count;
+					}
+					int Solution::books(vector<int> &A, int B) {
+						if (A.size() < B) {
+							return -1;
+						}
+						int start = *max_element(A.begin(), A.end());
+						int end = INT_MAX, mid;
+						while (start < end) {
+							mid = start + (end - start) / 2;
+							if (check(A, mid) <= B) {
+								end = mid;
+							} else {
+								start = mid + 1;
+							}
+						}
+						return start;
+					}
+				}
+				{
+					/*
+					Painter's Partition Problem
+					https://www.interviewbit.com/problems/painters-partition-problem/
+
+					#Good #Famous
+					*/
+					bool check(long long T, int a, vector<int>& c) {
+						long long cur = 0;
+						int n = c.size(), cnt = 1;
+						for (int i = 0; i < n; i++) {
+							cur += (long long)(c[i]);
+							if (cur > T) {
+								cur = (long long)(c[i]);
+								cnt++;
+							}
+						}
+						return cnt <= a;
+					}
+					int Solution::paint(int a, int b, vector<int> &c) {
+						long long start = (*max_element(c.begin(), c.end())), end = LONG_MAX, mid;
+						while (start <= end) {
+							mid = start + (end - start) / 2;
+							if (check(mid, a, c)) {
+								end = mid - 1;
+							} else {
+								start = mid + 1;
+							}
+						}
+						long long ans = ((b % 10000003) * (start % 10000003)) % 10000003;
+						return ans;
+					}
+				}
+			}
+			//Search Step Simulation
+			{
+				{
+					/*
+					Implement Power Function
+					https://www.interviewbit.com/problems/implement-power-function/
+
+					#Famous
+					*/
+					int Solution::pow(int x, int n, int d) {
+						if (x == 0) return 0;
+
+						int flag = 1;
+						if (x < 0) { x = -x; flag = -1;}
+
+						x = x % d;
+
+						if (n == 0) return 1;
+						if (n == 1) {return (flag == 1) ? x : (d - x);}
+
+						long long ans;
+						long long temp = ((long long int)x * (long long int)x) % d;
+						// cout<<n<<" "<<n/2<<" \n";
+						if (n % 2 == 0) {
+							ans = pow(temp, n / 2 , d) % d;
+						} else {
+							ans = flag * ((long long int)x % d) * pow(temp, n / 2 , d) % d;
+						}
+						// cout<<ans%d<<" "<<temp<<" "<<n<<" \n";
+						return ans % d;
+					}
+				}
+			}
+			// Sort Modification
+			{
+				{
+					/*
+					Median of Two Sorted Arrays
+					https://leetcode.com/problems/median-of-two-sorted-arrays/
+
+					#Famous
+					*/
+					double findMedianSortedArrays(vector<int>& nums1, vector<int>& nums2) {
+						int n1 = nums1.size(), n2 = nums2.size();
+						if (n1 < n2) return findMedianSortedArrays(nums2, nums1);
+						if (n2 == 0) {
+							if (n1 == 1) return nums1[0];
+							if (n1 % 2 == 0) {
+								return (double)(nums1[n1 / 2 - 1] + nums1[n1 / 2]) / 2;
+							}
+							return nums1[n1 / 2];
+						}
+						int total_n = n1 + n2;
+						int l1 = 0, r1 = n1 - 1, m1;
+						int l2 = 0, r2 = n2 - 1, m2;
+
+						while (l1 <= r1) {
+							m1 = (l1 + r1) / 2;
+							m2 = (total_n + 1) / 2 - m1 - 2;
+
+							int n1max = (m1 + 1 >= n1) ? INT_MAX : nums1[m1 + 1];
+							int n1min = (m1 < 0) ? INT_MIN : nums1[m1];
+
+							int n2max = (m2 + 1 >= n2) ? INT_MAX : nums2[m2 + 1];
+							int n2min = (m2 < 0) ? INT_MIN : nums2[m2];
+
+							if (n1min <= n2max && n2min <= n1max) {
+								if (total_n % 2 == 0) {
+									return (double)(max(n1min, n2min) + min(n1max, n2max)) / 2;
+								} else {
+									return min(n1max, n2max);
+								}
+							} else if (n1min > n2max) {
+								r1 = m1 - 1;
+							} else {
+								l1 = m1 + 1;
+							}
+						}
+						return 0;
+					}
+				}
+			}
+		}
+// Arrays
+		{
+			// Array Math
+			{
+				{
+					/*
+					Pick from both sides!
+					https://www.interviewbit.com/problems/pick-from-both-sides/
+					*/
+					int sum(vector<int> &A, int i, int j) {
+						int sum = 0;
+						for (int a = i; a <= j; a++) {
+							sum += A[a];
+						}
+						return sum;
+					}
+					int Solution::solve(vector<int> &A, int B) {
+						int max = sum(A, 0, B - 1);
+						int temp = max, i = B - 1, j = A.size() - 1;
+						for (int k = 1; k <= B; k++) {
+							if (i == -1) {
+								i = A.size() - 1;
+							}
+							if (j == -1) {
+								j = A.size() - 1;
+							}
+							temp -= A[i--];
+							temp += A[j--];
+							if (temp > max) {
+								max = temp;
+							}
+						}
+						return max;
+					}
+				}
+				{
+					/*
+					Min Steps in Infinite Grid
+					https://www.interviewbit.com/problems/min-steps-in-infinite-grid/
+
+					#Good
+					*/
+					int Solution::coverPoints(vector<int> &A, vector<int> &B) {
+						int n1 = A.size(), n2 = B.size(), ans = 0;
+						for (int i = 1; i < n1; i++) {
+							int x = abs(A[i - 1] - A[i]);
+							int y = abs(B[i - 1] - B[i]);
+							ans += max(x, y);
+						}
+						return ans;
+					}
+				}
+				{
+					/*
+					Minimum Lights to Activate
+					https://www.interviewbit.com/problems/minimum-lights-to-activate/
+
+					#Good
+					*/
+					int Solution::solve(vector<int> &A, int B) {
+						int b = B - 1, count = 0;
+						int s = A.size();
+						int lastlight = -1, check = 0;
+						for (int i = b; i >= 0; i--) {
+							if (A[i] == 1) {
+								lastlight = i; //last light from B-1 to 0
+								count++;
+								break;
+							}
+						}
+						if (count == 0) {
+							return -1;
+						}
+						check = lastlight + B; //first lightoff
+						while (check < s) {
+							int flag = 0;
+							for (int i = min(check + b, s - 1); i >= check - b; i--) {
+								if (A[i] == 1) {
+									lastlight = i;
+									flag = 1;
+									check = i + B;
+									count++;
+									break;
+								}
+							}
+							if (flag == 0) {
+								return -1;
+							}
+						}
+						return count;
+					}
+				}
+				{
+					/*
+					Max Sum Contiguous Subarray
+					https://www.interviewbit.com/problems/max-sum-contiguous-subarray/
+
+					#Famous #Revise
+					*/
+					int Solution::maxSubArray(const vector<int> &A) {
+						int mx = *max_element(A.begin(), A.end());
+						if (mx <= 0)return mx;
+						int ans = 0, sum = 0;
+						for (int i = 0; i < A.size(); i++) {
+							sum += A[i];
+							if (sum <= 0) {
+								sum = 0;
+								continue;
+							}
+							ans = max(ans, sum);
+						}
+						return ans;
+					}
+				}
+				{
+					/*
+					Maximum Absolute Difference
+					https://www.interviewbit.com/problems/maximum-absolute-difference/
+
+					#Good #Tricky
+					*/
+					int Solution::maxArr(vector<int> &A) {
+						int n = A.size();
+						vector<int> P(n), N(n);
+						int ans = 0;
+						for (int i = 0; i < n; i++) {
+							P[i] = A[i] + i;
+							N[i] = A[i] - i;
+						}
+						return max(*max_element(P.begin(), P.end()) - *min_element(P.begin(), P.end()),
+						           *max_element(N.begin(), N.end()) - *min_element(N.begin(), N.end()));
+					}
+				}
+				{
+					/*
+					Partitions
+					https://www.interviewbit.com/problems/partitions/
+
+					#Good
+					*/
+					// Best
+					{
+						// Function to count the no of ways
+						int countways(int n, vector<int>& a)
+						{
+							int pre[n];
+							pre[0] = a[0];
+							for (int i = 1; i < n; i++) pre[i] = pre[i - 1] + a[i];
+							if (pre[n - 1] % 3) return 0;
+							int req = pre[n - 1] / 3;
+							int cnt = 0;
+							int ans = 0;
+							for (int i = 0; i < n - 1; i++)
+							{
+								if (pre[i] == 2 * req) ans += cnt;
+								cnt += (pre[i] == req);
+							}
+							return ans;
+						}
+						int Solution::solve(int A, vector<int> &B) {
+							assert(A >= 1 && A <= 100000 && A == B.size());
+							for (int a : B)assert(a >= -1000000000 && a <= 1000000000);
+							return countways(A, B);
+						}
+					}
+					// Good
+					{
+						int Solution::solve(int n, vector<int> &A) {
+							vector<int> sum(n, 0);
+							sum[0] = A[0];
+							for (int i = 1; i < n; i++) {
+								sum[i] = sum[i - 1] + A[i];
+							}
+							if (abs(sum[n - 1]) % 3 > 0)return 0;
+							int count = 0, S = sum[n - 1] / 3;
+							for (int i = 0; i < n - 1; i++) {
+								for (int j = i + 1; j < n - 1; j++) {
+									if (sum[i] == S && sum[j] == 2 * S)count++;
+								}
+							}
+							return count;
+						}
+					}
+				}
+				{
+					/*
+					Maximum Area of Triangle!
+					https://www.interviewbit.com/problems/maximum-area-of-triangle/
+					*/
+					int ans = 0;
+					int code(char c) {
+						if (c == 'r') {
+							return 0;
+						} else if (c == 'g') {
+							return 1;
+						} else {
+							return 2;
+						}
+					}
+					int area(float x, float y) {
+						return ceil((x * y) / 2);
+					}
+					int Solution::solve(vector<string> &A) {
+						ans = 0;
+						int m = A[0].size(), n = A.size();
+						vector<int> M(3, -1), // largest overall
+						       N(3, INT_MAX); //smallest overall
+						for (int i = 0; i < n; i++) {
+							for (int j = 0; j < m; j++) {
+								int c = code(A[i][j]);
+								M[c] = max(M[c], j);
+								N[c] = min(N[c], j);
+							}
+						}
+						for (int j = 0; j < m; j++) {
+							vector<int> B(3, -1), //largest in col
+							       S(3, INT_MAX); //smallest in col
+							for (int i = 0; i < n; i++) {
+								int c = code(A[i][j]);
+								B[c] = max(B[c], i);
+								S[c] = min(S[c], i);
+							}
+							for (int c = 0; c < 3; c++) {
+								int a = (c + 1) % 3, b = (c + 2) % 3;
+								if (B[a] != -1 && B[b] != -1 && M[c] != -1) {
+									int x = max(abs(B[a] - S[b]), abs(B[b] - S[a])) + 1;
+									int y = max(abs(M[c] - j), abs(N[c] - j)) + 1;
+									if (y == 1)continue;
+									ans = max(ans, area(x, y));
+								}
+							}
+						}
+						return ans;
+					}
+				}
+				{
+					/*
+					Flip
+					https://www.interviewbit.com/problems/flip/
+
+					#Good #VeryGood
+					*/
+					vector<int> Solution::flip(string A) {
+						int n = A.length(), start = 1, end = -1;
+						int sum = 0, psum = 0;
+						vector<int> vec{1, -1};
+						for (int i = 0; i < A.size(); i++) {
+							if (A[i] == '0') {
+								sum++;
+								if (sum > psum) {
+									vec[0] = start;
+									vec[1] = i + 1;
+									psum = sum;
+								}
+							} else if (A[i] == '1') {
+								sum--;
+								if (sum < 0) {
+									sum = 0;
+									start = i + 2;
+								}
+							}
+						}
+
+						if (vec[1] == -1) {
+							vec.clear();
+						}
+						return vec;
+					}
+				}
+			}
+			// Value Range
+			{
+				{
+					/*
+					Merge Intervals
+					https://www.interviewbit.com/problems/merge-intervals/
+					*/
+					vector<Interval> Solution::insert(vector<Interval> &intervals, Interval newInterval) {
+						vector<Interval> res;
+						for (Interval test : intervals) {
+							if (newInterval.start > test.end) res.push_back(test);
+							else if (test.start > newInterval.end) {
+								res.push_back(newInterval);
+								newInterval = test;
+							} else if (newInterval.start <= test.end || newInterval.end >= test.start) {
+								newInterval = Interval(min(test.start, newInterval.start), max(test.end, newInterval.end));
+							}
+						}
+						res.push_back(newInterval);
+						return res;
+					}
+				}
+				{
+					/*
+					Merge Overlapping Intervals
+					https://www.interviewbit.com/problems/merge-overlapping-intervals/
+
+					#Good
+					*/
+					bool sortfun(Interval A, Interval B) {
+						return (A.start < B.start);
+					}
+					vector<Interval> Solution::merge(vector<Interval> &A) {
+						int n = A.size();
+						sort(A.begin(), A.end(), sortfun);
+						vector<Interval> ans;
+						Interval temp;
+						temp = Interval(A[0].start, A[0].end);
+						for (int i = 1; i < n; i++) {
+							if (A[i].start >= temp.start && A[i].start <= temp.end) {
+								temp = Interval(min(A[i].start, temp.start), max(A[i].end, temp.end));
+							} else {
+								ans.push_back(temp);
+								temp = Interval(A[i].start, A[i].end);
+							}
+						}
+						ans.push_back(temp);
+
+						return ans;
+					}
+				}
+				{
+					/*
+					Perfect Peak of Array
+					https://www.interviewbit.com/problems/perfect-peak-of-array/
+					*/
+					int Solution::perfectPeak(vector<int> &A) {
+						int size = A.size(), leftmax[size], rightmin[size];
+						leftmax[0] = A[0];
+						for (int i = 1; i < size; i++) {
+							leftmax[i] = max(A[i - 1], leftmax[i - 1]);
+						}
+						rightmin[size - 1] = A[size - 1];
+						for (int i = size - 2; i >= 0; i--) {
+							rightmin[i] = min(A[i + 1], rightmin[i + 1]);
+						}
+						for (int i = 1; i < size - 1; i++) {
+							if (A[i] > leftmax[i] && A[i] < rightmin[i]) {
+								return 1;
+							}
+						}
+						return 0;
+					}
+				}
+				{
+					/*
+					Spiral Order Matrix II
+					https://www.interviewbit.com/problems/spiral-order-matrix-ii/
+					*/
+					//Best Solution
+					{
+						vector<vector<int> > Solution::generateMatrix(int A) {
+							vector< vector<int> > arr(A, vector<int> (A, 0));
+							int start, end, i;
+							long long int x;
+							x = 1;
+							for (start = 0, end = A - 1; start <= end; start++, end--)
+							{
+								for (i = start; i <= end; i++) { arr[start][i] = x; x++;}
+								for (i = start + 1; i <= end; i++) { arr[i][end] = x; x++;}
+								for (i = end - 1; i >= start; i--) { arr[end][i] = x; x++;}
+								for (i = end - 1; i >= start + 1; i--) { arr[i][start] = x; x++;}
+							}
+							return arr;
+						}
+					}
+					// Good
+					{
+						vector<vector<int> > Solution::generateMatrix(int A) {
+							vector<vector<int>> B(A, vector<int>(A, 0));
+							int num = 1;
+							int lim[4] = {0, A - 1, A - 1, 0}; //top 0, right 1, bottom 2, left 3
+							int direction = 1;
+
+							while (lim[0] <= lim[2] && lim[3] <= lim[1]) {
+								if (direction == 1) {
+									for (int i = lim[3]; i <= lim[1]; i++) {
+										B[lim[0]][i] = num++;
+									}
+									lim[0]++;
+									direction = 2;
+								} else if (direction == 2) {
+									for (int i = lim[0]; i <= lim[2]; i++) {
+										B[i][lim[1]] = num++;
+									}
+									lim[1]--;
+									direction = 3;
+								} else if (direction == 3) {
+									for (int i = lim[1]; i >= lim[3]; i--) {
+										B[lim[2]][i] = num++;
+									}
+									lim[2]--;
+									direction = 4;
+								} else if (direction == 4) {
+									for (int i = lim[2]; i >= lim[0]; i--) {
+										B[i][lim[3]] = num++;
+									}
+									lim[3]++;
+									direction = 1;
+								}
+							}
+							return B;
+						}
+					}
+				}
+				{
+					/*
+					Pascal Triangle
+					https://www.interviewbit.com/problems/pascal-triangle/
+					*/
+					vector<vector<int> > Solution::solve(int A) {
+						vector<vector<int>> B;
+						if (A == 0) {
+							return B;
+						}
+						vector<int> C(1, 1);
+						B.push_back(C);
+						for (int i = 1; i < A; i++) {
+							vector<int> C(i + 1, 1);
+							for (int j = 1; j < i; j++) {
+								C[j] = B[i - 1][j] + B[i - 1][j - 1];
+							}
+							B.push_back(C);
+						}
+						return B;
+					}
+				}
+				{
+					/*
+					Anti Diagonals
+					https://www.interviewbit.com/problems/anti-diagonals/
+					*/
+					vector<vector<int> > Solution::diagonal(vector<vector<int> > &A) {
+						int n = A.size();
+						if (n == 0) {
+							return {} ;
+						}
+						vector<vector<int>> B(2 * n - 1);
+						for (int k = 0; k < n; k++) {
+							vector<int> C(k + 1);
+							int i = 0, j = k;
+							while (i <= k) {
+								C[i] = A[i][j--];
+								i++;
+							}
+							B[k] = C;
+						}
+						for (int k = 0; k < n - 1; k++) {
+							vector<int> C(n - 1 - k);
+							int i = 1 + k, j = n - 1;
+							while (i < n) {
+								C[i - 1 - k] = A[i][j--];
+								i++;
+							}
+							B[k + n] = C;
+						}
+						return B;
+					}
+				}
+				{
+					/*
+					Triplets with Sum between given range
+					https://www.interviewbit.com/problems/triplets-with-sum-between-given-range/
+
+					#Good
+					*/
+					int Solution::solve(vector<string> &A) {
+						int n = A.size();
+						vector<double> v(n, 0);
+						for (int i = 0; i < n; i++) v[i] = stod(A[i]);
+
+						if (n < 3) return 0;
+
+						double minm, maxm;
+						bool lower_limit, uper_limit;
+						maxm = (v[0] > v[1]) ? v[0] : v[1];
+						minm = (v[0] < v[1]) ? v[0] : v[1];
+						double currsum;
+						for (int i = 2; i < n; i++) {
+							currsum = maxm + minm + v[i];
+							lower_limit = currsum > 1;
+							uper_limit = currsum < 2;
+
+							if (lower_limit && uper_limit) return 1;
+							else if (!uper_limit) {
+								maxm = min(maxm, v[i]);
+								if (minm > maxm) swap<double>(minm, maxm);
+							}
+							else if (!lower_limit) {
+								minm = max(minm, v[i]);
+								if (minm > maxm) swap<double>(minm, maxm);
+							}
+
+						}
+						return 0;
+					}
+				}
+				{
+					/*
+					Balance Array
+					https://www.interviewbit.com/problems/balance-array/
+					*/
+					int Solution::solve(vector<int> &A) {
+						int size = A.size(), count = 0;
+						int lefteven = 0, leftodd = 0;
+						int righteven = 0, rightodd = 0;
+						for (int i = 0; i < size; i += 2) {
+							righteven += A[i];
+						}
+						for (int i = 1; i < size; i += 2) {
+							rightodd += A[i];
+						}
+
+						for (int i = 0; i < size; i++) {
+							//cout<<lefteven<<" "<<rightodd<<" "<<leftodd<<" "<<righteven<<" ";
+							if (i % 2 == 0) {
+								if ((lefteven + rightodd) == (leftodd + righteven - A[i])) {
+									count++;
+								}
+								lefteven += A[i];
+								righteven -= A[i];
+							}
+							if (i % 2 == 1) {
+								if ((lefteven + rightodd - A[i]) == (leftodd + righteven)) {
+									count++;
+								}
+								leftodd += A[i];
+								rightodd -= A[i];
+							}
+						}
+						return count;
+					}
+				}
+				{
+					/*
+					Find Duplicate in Array
+					https://www.interviewbit.com/problems/find-duplicate-in-array/
+					*/
+					int Solution::repeatedNumber(const vector<int> &A) {
+						vector<int> B(A.size(), 0);
+						for (int i = 0; i < A.size(); i++) {
+							B[A[i]] += 1;
+						}
+						for (int i = 0; i < A.size(); i++) {
+							if (B[i] >= 2) {
+								return i;
+							}
+						}
+						return -1;
+					}
+				}
+				{
+					/*
+					Maximum Consecutive Gap
+					https://www.interviewbit.com/problems/maximum-consecutive-gap/
+
+					#Good #Revise #Bucketing
+					*/
+					int Solution::maximumGap(const vector<int> &A) {
+						if (A.size() < 2) return 0;
+						int mn = *min_element(A.begin(), A.end()), mx = *max_element(A.begin(), A.end()), n = A.size();
+						double gap = (double)(mx - mn) / (n - 1);
+						if (gap == 0)return 0;
+						vector<int>mx_buc(n, INT_MIN), mn_buc(n, INT_MAX);
+						for (int x : A) {
+							int ind = floor((x - mn) / gap);
+							if (mn == x)continue;
+							mx_buc[ind] = max(mx_buc[ind], x);
+							mn_buc[ind] = min(mn_buc[ind], x);
+						}
+						int mx_gp = INT_MIN, prev_mx = mn;
+						for (int i = 0; i < n; i++) {
+							if (mn_buc[i] == INT_MAX)continue;
+							int cur = mn_buc[i] - prev_mx;
+							mx_gp = max(mx_gp, cur);
+							prev_mx = mx_buc[i];
+						}
+						return mx_gp;
+					}
+				}
+			}
+			// Arrangement
+			{
+				{
+					/*
+					Sort array with squares!
+					https://www.interviewbit.com/problems/sort-array-with-squares/
+					*/
+					vector<int> Solution::solve(vector<int> &A) {
+						int s = A.size(), start = 0, end = s - 1;
+						int sq1, sq2;
+						vector<int> B;
+						sq1 = A[start] * A[start];
+						sq2 = A[end] * A[end];
+						while (start != end) {
+							if (sq1 >= sq2) {
+								B.push_back(sq1);
+								start++;
+								sq1 = A[start] * A[start];
+							} else {
+								B.push_back(sq2);
+								end--;
+								sq2 = A[end] * A[end];
+							}
+						}
+						B.push_back(A[start]*A[start]);
+						reverse(B.begin(), B.end());
+						return B;
+					}
+				}
+				{
+					/*
+					Largest Number
+					https://www.interviewbit.com/problems/largest-number/
+
+					#Good
+					*/
+					int myCompare(string X, string Y) {
+						string XY = X.append(Y);
+						string YX = Y.append(X);
+						return XY.compare(YX) > 0 ? 1 : 0;
+					}
+
+					string Solution::largestNumber(const vector<int> &A) {
+						vector<string> b;
+						for (int i = 0; i < A.size(); i++) {
+							b.push_back(to_string(A[i]));
+						}
+						sort(b.begin(), b.end(), myCompare);
+						string ans = "";
+						for (int i = 0; i < b.size(); i++) {
+							ans += b[i];
+						}
+						int i = 0;
+						while (ans[i] == '0') {
+							i++;
+						}
+						if (i == ans.length())
+							ans = "0";
+						return ans;
+					}
+				}
+				{
+					/*
+					Rotate Matrix
+					https://www.interviewbit.com/problems/rotate-matrix/
+					*/
+					void Solution::rotate(vector<vector<int> > &A) {
+						int n = A.size();
+						for (int i = 0; i < n; i++) {
+							for (int j = i; j < n - i - 1; j++) {
+								swap(A[i][j], A[j][n - i - 1]);
+								swap(A[i][j], A[n - i - 1][n - j - 1]);
+								swap(A[i][j], A[n - j - 1][i]);
+							}
+						}
+					}
+				}
+				{
+					/*
+					Find Permutation
+					https://www.interviewbit.com/problems/find-permutation/
+					*/
+					vector<int> Solution::findPerm(const string A, int B) {
+						int big = B, small = 1, i = 0;
+						vector<int> ans(B);
+						while (i < B) {
+							if (A[i] == 'D') {
+								ans[i++] = big--;
+							} else {
+								ans[i++] = small++;
+							}
+						}
+						return ans;
+					}
+				}
+				{
+					/*
+					Next Permutation
+					https://www.interviewbit.com/problems/next-permutation/
+
+					#Good
+					*/
+					vector<int> Solution::nextPermutation(vector<int> &num) {
+						int len = num.size();
+						int i, j;
+						for (i = len - 2; i >= 0 ; i--)
+							if (num[i] < num[i + 1]) break;
+
+						if (i == -1) {
+							reverse(num.begin(), num.end());
+							return num;
+						}
+
+						for (j = len - 1; j > i; j--)
+							if (num[j] > num[i]) break;
+
+						swap(num[i], num[j]);
+						reverse(num.begin() + i + 1, num.end());
+						return num;
+					}
+				}
+			}
+			// Sorting
+			{
+				{
+					/*
+					Noble Integer
+					https://www.interviewbit.com/problems/noble-integer/
+					*/
+					int Solution::solve(vector<int> &A) {
+						int n = A.size();
+						sort(A.begin(), A.end(), greater<int>());
+						if (A[0] == 0) return 1;
+						for (int i = 1; i < n; i++) {
+							if (A[i] == i && A[i] != A[i - 1]) return 1;
+						}
+						return -1;
+					}
+				}
+				{
+					/*
+					Wave Array
+					https://www.interviewbit.com/problems/wave-array/
+					*/
+					vector<int> Solution::wave(vector<int> &A) {
+						sort(A.begin(), A.end());
+						int i = 0;
+						for (i = 0; i < A.size() - 2; i += 2) {
+							swap(A[i], A[i + 1]);
+						}
+						if (i == A.size() - 2) {
+							swap(A[A.size() - 1], A[A.size() - 2]);
+						}
+						return A;
+					}
+				}
+				{
+					/*
+					Hotel Bookings Possible
+					https://www.interviewbit.com/problems/hotel-bookings-possible/
+
+					#Good
+					*/
+					bool Solution::hotel(vector<int> &arrival, vector<int> &departure, int K) {
+						int n = arrival.size();
+						vector<pair<int, int> > ans;
+						for (int i = 0; i < n; i++) {
+							ans.push_back(make_pair(arrival[i], 1));
+							ans.push_back(make_pair(departure[i], 0));
+						}
+
+						sort(ans.begin(), ans.end());
+
+						int curr_active = 0, max_active = 0;
+
+						for (int i = 0; i < ans.size(); i++) {
+							if (ans[i].second == 1) {
+								curr_active++;
+								max_active = max(max_active, curr_active);
+							}
+							else
+								curr_active--;
+						}
+
+						return (K >= max_active);
+					}
+				}
+				{
+					/*
+					Max Distance
+					https://www.interviewbit.com/problems/max-distance/
+					*/
+					int Solution::maximumGap(const vector<int> &A) {
+						int s = A.size();
+						vector<pair<int, int>> B;
+						for (int i = 0; i < s; i++) {
+							B.push_back(make_pair(A[i], i));
+						}
+						sort(B.begin(), B.end());
+						int maxIndex = B[s - 1].second;
+						int ans = 0;
+						for (int i = s - 2; i >= 0; i--) {
+							ans = max(ans, maxIndex - B[i].second);
+							maxIndex = max(maxIndex, B[i].second);
+						}
+						return ans;
+					}
+				}
+				{
+					/*
+					Maximum Unsorted Subarray
+					https://www.interviewbit.com/problems/maximum-unsorted-subarray/
+					*/
+					vector<int> Solution::subUnsort(vector<int> &A) {
+						int n = A.size();
+						vector<int> ans(1, -1);
+						if (n <= 1) {
+							return ans;
+						}
+						int max = A[0];
+						int i;
+						for (i = 1; i < n; i++) {
+							if (A[i] < A[i - 1]) {
+								ans[0] = i - 1;
+								break;
+							}
+						}
+						if (i == n)   return ans;
+						ans.push_back(n - 1);
+						for (i = n - 2; i >= ans[0]; i--) {
+							if (A[i] > A[i + 1]) {
+								ans[1] = i + 1;
+								break;
+							}
+						}
+						int mini = *min_element(A.begin() + ans[0], A.begin() + ans[1] + 1);
+						int maxi = *max_element(A.begin() + ans[0], A.begin() + ans[1] + 1);
+						for (i = 0; i < ans[0]; i++) {
+							if (A[i] > mini) {
+								ans[0] = i;
+							}
+						}
+						for (i = n - 1; i > ans[1]; i--) {
+							if (A[i] < maxi) {
+								ans[1] = i;
+							}
+						}
+						return ans;
+					}
+				}
+			}
+			// Space Recycle
+			{
+				{
+					/*
+					Set Matrix Zeros
+					https://www.interviewbit.com/problems/set-matrix-zeros/
+
+					#Famous
+					*/
+					void Solution::setZeroes(vector<vector<int> > &A) {
+						int n = A.size();
+						int m = A[0].size();
+
+						vector<bool> row(n, false), col(m, false);
+						for (int i = 0; i < n; i++) {
+							for (int j = 0; j < m; j++) {
+								if (A[i][j] == 0) {
+									row[i] = true;
+									col[j] = true;
+								}
+							}
+						}
+
+						for (int i = 0; i < n; i++) {
+							for (int j = 0; j < m; j++) {
+								if (row[i] || col[j]) {
+									A[i][j] = 0;
+								}
+							}
+						}
+					}
+				}
+				{
+					/*
+					Maximum Sum Square SubMatrix
+					https://www.interviewbit.com/problems/maximum-sum-square-submatrix/
+					*/
+				}
+			}
+			// Missing / Repeated number
+			{
+				{
+					/*
+					First Missing Integer
+					https://www.interviewbit.com/problems/first-missing-integer/
+
+					#Good #Famous #Revise
+					*/
+					int Solution::firstMissingPositive(vector<int> &A) {
+						int n = A.size();
+						for (int i = 0; i < n; i++) {
+							if (A[i] > 0 && A[i] <= n) {
+								int pos = A[i] - 1;
+								if (A[pos] != A[i]) {
+									swap(A[pos], A[i]);
+									i--;
+								}
+							}
+						}
+						for (int i = 0; i < n; i++) {
+							if (A[i] != i + 1) return (i + 1);
+						}
+						return n + 1;
+					}
+				}
+				{
+					/*
+					Repeat and Missing Number Array
+					https://www.interviewbit.com/problems/repeat-and-missing-number-array/
+
+					#Tricky #Revise
+					*/
+					//#define ll long long
+					vector<int> Solution::repeatedNumber(const vector<int> &A) {
+						ll n = A.size();
+
+						ll diff = 0;
+						for (ll i = 0; i < n; i++)  diff += (ll)(A[i] - (i + 1)); // a-b
+
+						ll sqDiff = 0;
+						for (ll i = 0; i < n; i++)  sqDiff += (ll)((ll)A[i] * (ll)A[i] - (i + 1) * (i + 1)); //I was forgetting to typecast here, so It gave alot of error :(
+
+						ll sum = sqDiff / diff; // a+b
+
+						int a = (sum + diff) / 2;
+						int b = (sum - a);
+
+						vector<int> v{a, b};
+						return v;
+					}
+				}
+				{
+					/*
+					N/3 Repeat Number
+					https://www.interviewbit.com/problems/n3-repeat-number/
+
+					#Tricky #Famous
+					*/
+					int count(int x, const vector<int> &A) {
+						int n = A.size(), cont = 0;
+						for (int i = 0; i < n; i++) {
+							if (A[i] == x)cont++;
+						}
+						return cont;
+					}
+					int Solution::repeatedNumber(const vector<int> &A) {
+						int n = A.size(), lim = n / 3 + 1;
+						vector<pair<int, int>> M;
+						for (int i = 0; i < n; i++) {
+							if (M.empty()) {
+								M.push_back({A[i], 1});
+							} else if (A[i] == M[0].first) {
+								M[0].second++;
+							} else if (M.size() == 1) {
+								M.push_back({A[i], 1});
+							} else if (A[i] == M[1].first) {
+								M[1].second++;
+							} else {
+								M[0].second--;
+								M[1].second--;
+								if (M[0].second == 0 && M[1].second == 0) {
+									M.clear();
+								} else if (M[0].second == 0) {
+									M.erase(M.begin());
+								} else if (M[1].second == 0) {
+									M.erase(M.begin() + 1);
+								}
+							}
+						}
+						for (auto x : M) {
+							if (count(x.first, A) >= lim)return x.first;
+						}
+						return -1;
+					}
+				}
+			}
+		}
+// Strings
+		{
+			// String Simulation
+			{
+				{
+					/*
+					Palindrome String
+					https://www.interviewbit.com/problems/palindrome-string/
+
+					#Famous
+					*/
+					int Solution::isPalindrome(string s) {
+						int i = 0, j = (int)s.size() - 1;
+						while (i < j) {
+							while (i < j && !isalnum(s[i])) i++;
+							while (i < j && !isalnum(s[j])) j--;
+							if (toupper(s[i]) != toupper(s[j])) return false;
+							i++;
+							j--;
+						}
+						return true;
+					}
+				}
+				{
+					/*
+					Vowel and Consonant Substrings!
+					https://www.interviewbit.com/problems/vowel-and-consonant-substrings/
+					*/
+					bool vowel(char c) {
+						if (c == 'a' || c == 'e' || c == 'i' || c == 'o' || c == 'u')return 1;
+						return 0;
+					}
+					int Solution::solve(string A) {
+						int n = A.length(), vcount = 0, ccount = 0, ans = 0;
+						for (int i = 0; i < n; i++) {
+							if (vowel(A[i])) {
+								vcount++;
+								ans += ccount;
+							} else {
+								ccount++;
+								ans += vcount;
+							}
+							ans %= 1000000007;
+						}
+						return ans;
+					}
+				}
+				{
+					/*
+					Remove Consecutive Characters
+					https://www.interviewbit.com/problems/remove-consecutive-characters/
+					*/
+					string Solution::solve(string A, int B) {
+						char temp = A[0];
+						int count = 0;
+						string ans = "";
+						for (int i = 0; i < A.length(); i++) {
+							if (temp != A[i]) {
+								if (count != B) ans += string(count, temp);
+								count = 1;
+								temp = A[i];
+							} else {
+								count++;
+							}
+						}
+						if (count != B) ans += string(count, temp);
+						return ans;
+					}
+				}
+				{
+					/*
+					Longest Common Prefix
+					https://www.interviewbit.com/problems/longest-common-prefix/
+
+					#Good
+					*/
+					// Best
+					{
+						Can use Binary search on minimum size string
+					}
+					// Good
+					{
+						string Solution::longestCommonPrefix(vector<string> &A) {
+							string ans = "";
+							int n = A.size(), m = INT_MAX;
+							for (string s : A) m = min(m, (int) s.size());
+							for (int j = 0; j < m; j++) {
+								for (int i = 1; i < n; i++) {
+									if (A[i][j] != A[0][j]) return ans;
+								}
+								ans += A[0][j];
+							}
+							return ans;
+						}
+					}
+				}
+				{
+					/*
+					Count And Say
+					https://www.interviewbit.com/problems/count-and-say/
+					*/
+					string Solution::countAndSay(int A) {
+						string ans = "1";
+						while (A-- > 1) {
+							int n = ans.size(), count = 1;
+							string temp = "";
+							for (int i = 1; i < n; i++) {
+								if (ans[i] != ans[i - 1]) {
+									temp += to_string(count) + ans[i - 1];
+									count = 1;
+								} else {
+									count++;
+								}
+							}
+							temp += to_string(count) + ans.back();
+							ans = temp;
+						}
+						return ans;
+					}
+				}
+			}
+			// String Search
+			{
+				{
+					/*
+					Amazing Subarrays
+					https://www.interviewbit.com/problems/amazing-subarrays/
+					*/
+					bool check(char c) {
+						c = toupper(c);
+						if (c == 'A' || c == 'E' || c == 'I' || c == 'O' || c == 'U')return 1;
+						return 0;
+					}
+					int Solution::solve(string A) {
+						int n = A.length(), count = 0;
+						for (int i = 0; i < n; i++) {
+							if (check(A[i])) {
+								count += (n - i) % 10003;
+							}
+						}
+						return count % 10003;
+					}
+				}
+				{
+					/*
+					Implement StrStr
+					https://www.interviewbit.com/problems/implement-strstr/
+
+					#KMP
+					*/
+				}
+				{
+					/*
+					Stringoholics
+					https://www.interviewbit.com/problems/stringoholics/
+
+					#GCD*/
+				}
+			}
+			// String Tricks
+			{
+				{
+					/*
+					Minimum Characters required to make a String Palindromic
+					https://www.interviewbit.com/problems/minimum-characters-required-to-make-a-string-palindromic/
+					*/
+					int Solution::solve(string A) {
+						int n = A.length();
+						int l = 0, r = n - 1;
+						while (l < r) {
+							if (A[l] != A[r]) {
+								if (l == 0) {
+									r--;
+								} else {
+									l = 0;
+								}
+							} else {
+								l++;
+								r--;
+							}
+						}
+						if (l == r) {
+							return n - 2 * l - 1;
+						} else {
+							return n - 2 * l;
+						}
+					}
+				}
+				{
+					/*
+					Longest Palindromic Substring
+					https://www.interviewbit.com/problems/longest-palindromic-substring/
+
+					#Famous #Revise
+					*/
+					string expandAroundCenter(string s, int c1, int c2) {
+						int l = c1, r = c2;
+						int n = s.length();
+						while (l >= 0 && r <= n - 1 && s[l] == s[r]) {
+							l--;
+							r++;
+						}
+						return s.substr(l + 1, r - l - 1);
+					}
+					string Solution::longestPalindrome(string s) {
+						int n = s.length();
+						if (n == 0) return "";
+						string longest = s.substr(0, 1);  // a single char itself is a palindrome
+						for (int i = 0; i < n - 1; i++) {
+							string p1 = expandAroundCenter(s, i, i);
+							if (p1.length() > longest.length())
+								longest = p1;
+
+							string p2 = expandAroundCenter(s, i, i + 1);
+							if (p2.length() > longest.length())
+								longest = p2;
+						}
+						return longest;
+					}
+				}
+				{
+					/*
+					Minimum Parantheses!
+					https://www.interviewbit.com/problems/minimum-parantheses/
+					*/
+					int Solution::solve(string A) {
+						int start = 0, i = 0, count = 0;
+						while (A[i] != '\0') {
+							if (A[i] == '(') {
+								start++;
+							} else if (A[i] == ')') {
+								if (start > 0) {
+									start--;
+								} else {
+									count++;
+								}
+							}
+							i++;
+						}
+						return start + count;
+					}
+				}
+				{
+					/*
+					Minimum Appends for Palindrome!
+					https://www.interviewbit.com/problems/minimum-appends-for-palindrome/
+
+					#Good
+					*/
+					int Solution::solve(string A) {
+						string B = A;
+						reverse(B.begin(), B.end());
+						B = B + '#' + A;
+						int n = B.length(), i = 1, len = 0;
+						vector<int> LPS(n, 0);
+						while (i < n) {
+							if (B[len] == B[i]) {
+								len++;
+								LPS[i] = len > (i + 1) / 2 ? (i + 1) / 2 : len;
+							} else {
+								if (len == 0) {
+									LPS[i] = 0;
+								} else {
+									len = LPS[len - 1];
+									i--;
+								}
+							}
+							i++;
+						}
+						return A.length() - LPS.back();
+					}
+				}
+				{
+					/*
+					Convert to Palindrome
+					https://www.interviewbit.com/problems/convert-to-palindrome/
+					*/
+					int Solution::solve(string A) {
+						int left = 0;
+						int right = A.size() - 1;
+						int count = 0;
+						while (left < right)
+						{
+							if (A[left] == A[right]) {left++; right--;}
+							else if (A[left + 1] == A[right]) {count++; left++;}
+							else if (A[left] == A[right - 1]) {count++; right--;}
+							else return 0;
+						}
+						if (count == 0 and left == right) return 1;
+						if (count == 1) return 1;
+						return 0;
+					}
+				}
+			}
+			// String Math
+			{
+				{
+					/*
+					Integer To Roman
+					https://www.interviewbit.com/problems/integer-to-roman/
+
+					#Famous
+					*/
+					vector<char> R = {'I', 'V', 'X', 'L', 'C', 'D', 'M'};
+					string roman(int x, int p) {
+						if (x == 0)return "";
+						if (x <= 3)return string(x, R[2 * p]);
+						else if (x <= 5)return string(5 - x, R[2 * p]) + R[2 * p + 1];
+						else if (x <= 8)return R[2 * p + 1] + string(x - 5, R[2 * p]);
+						string S = "";
+						return S + R[2 * p] + R[2 * p + 2];
+					}
+					string Solution::intToRoman(int A) {
+						int num[4];
+						string S = "";
+						for (int i = 3; i >= 0; i--) {
+							S += roman((A % (int)pow(10, i + 1)) / pow(10, i), i);
+						}
+						return S;
+					}
+				}
+				{
+					/*
+					Roman To Integer
+					https://www.interviewbit.com/problems/roman-to-integer/
+
+					#Famous
+					*/
+					int romanCharToInt(char c) {
+						switch (c) {
+						case 'I':   return 1;
+						case 'V':   return 5;
+						case 'X':   return 10;
+						case 'L':   return 50;
+						case 'C':   return 100;
+						case 'D':   return 500;
+						case 'M':   return 1000;
+						default:    return 0;
+						}
+					}
+					int Solution::romanToInt(string s) {
+						int num = 0;
+						int size = s.size();
+
+						for (int i = 0; i < size; i++) {
+							if (i < (size - 1) && romanCharToInt(s[i]) < romanCharToInt(s[i + 1])) {
+								num -= romanCharToInt(s[i]);
+							} else {
+								num += romanCharToInt(s[i]);
+							}
+						}
+						return num;
+					}
+				}
+				{
+					/*
+					Add Binary Strings
+					https://www.interviewbit.com/problems/add-binary-strings/
+					*/
+					string Solution::addBinary(string A, string B) {
+						if (A.length() < B.length()) {
+							swap(A, B);
+						}
+						int n = A.length(), m = B.length();
+						B = string(n - m, '0') + B;
+						int carry = 0, temp = 0;
+						for (int i = n - 1; i >= 0; i--) {
+							temp = A[i] - '0' + B[i] - '0' + carry;
+							if (temp == 3) {
+								carry = 1;
+							} else if (temp == 2) {
+								A[i] = '0';
+								carry = 1;
+							} else {
+								A[i] = '0' + temp;
+								carry = 0;
+							}
+						}
+						if (carry == 1) {
+							A = '1' + A;
+						}
+						return A;
+					}
+				}
+				{
+					/*
+					Power of 2
+					https://www.interviewbit.com/problems/power-of-2/
+					*/
+					string half(string A) {
+						string B = A;
+						int carry = 0;
+						for (int i = 0; i < A.length(); i++) {
+							B[i] = '0' + (A[i] - '0' + carry) / 2;
+							carry = ((A[i] - '0' + carry) % 2) * 10;
+						}
+						if (B[0] == '0') {
+							return B.substr(1, B.length() - 1);
+						}
+						return B;
+					}
+					int Solution::power(string A) {
+						int n = A.size();
+						int temp = A[A.length() - 1] - '0';
+						while (temp % 2 == 0) {
+							A = half(A);
+							if (A == "1") {
+								return 1;
+							}
+							temp = A[A.length() - 1] - '0';
+						}
+						return 0;
+					}
+				}
+				{
+					/*
+					Multiply Strings
+					https://www.interviewbit.com/problems/multiply-strings/
+					*/
+					string Solution::multiply(string A, string B) {
+						int m = A.size(), n = B.size();
+						string ans(m + n, '0');
+
+						for (int i = m - 1; i >= 0; --i) {
+							for (int j = n - 1; j >= 0; --j) {
+								int sum = (A[i] - '0') * (B[j] - '0') + (ans[i + j + 1] - '0');
+								ans[i + j + 1] = (sum % 10) + '0';
+								ans[i + j] += (sum / 10);
+							}
+						}
+
+						for (int i = 0; i < m + n; ++i) {
+							if (ans[i] != '0')
+								return ans.substr(i);
+						}
+						return "0";
+					}
+				}
+			}
+			// String Parsing
+			{
+				{
+					/*
+					Compare Version Numbers
+					https://www.interviewbit.com/problems/compare-version-numbers/
+
+					#Good
+					*/
+					int Solution::compareVersion(string A, string B) {
+						int j, i;
+						for ( i = 0, j = 0 ; i < A.size() || j < B.size() ; i++, j++) {
+							unsigned long long num1 = 0, num2 = 0;
+							while (i < A.size() && A[i] != '.') {
+								num1 *= 10;
+								num1 += A[i] - '0';
+								i++;
+							}
+							while (j < B.size() && B[j] != '.') {
+								num2 *= 10;
+								num2 += B[j] - '0';
+								j++;
+							}
+							if (num1 > num2) return 1;
+							if (num1 < num2) return -1;
+						}
+						return 0;
+					}
+				}
+				{
+					/*
+					Atoi
+					https://www.interviewbit.com/problems/atoi/
+
+					#Revise
+					*/
+					int Solution::atoi(const string & str) {
+						if (str == "") return 0;
+						stringstream ss(str);
+						int ret;
+						ss >> ret;
+						return ret;
+					}
+				}
+			}
+		}
+// Math
+		{
+			// Adhoc
+			{
+				{
+					/*
+					Verify Prime
+					https://www.interviewbit.com/problems/verify-prime/
+					*/
+					int Solution::isPrime(int A) {
+						if (A <= 1) {
+							return 0;
+						}
+						int s = (int) sqrt(A);
+						for (int i = 2; i <= s; i++) {
+							if (A % i == 0) {
+								return 0;
+							}
+						}
+						return 1;
+					}
+				}
+				{
+					/*
+					Sum of pairwise Hamming Distance
+					https://www.interviewbit.com/problems/sum-of-pairwise-hamming-distance/
+
+					#Good
+					*/
+					long long mod = 1000000007;
+					int Solution::hammingDistance(const vector<int> &A) {
+						long long ans = 0, x = 1, n = A.size();
+						while (x > 0) {
+							long long count = 0;
+							for (int i = 0; i < n; i++) {
+								if ((A[i]&x) > 0)count++;
+							}
+							ans += 2LL * (count * (n - count));
+							ans %= mod;
+							x <<= 1;
+						}
+						return ans;
+					}
+				}
+				{
+
+				}
 			}
 		}
 	}
-}
 
 
 
